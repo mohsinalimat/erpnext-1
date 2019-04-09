@@ -649,3 +649,4 @@ erpnext.patches.v12_0.remove_denied_leaves_from_leave_ledger
 erpnext.patches.v12_0.update_price_or_product_discount
 erpnext.patches.v12_0.add_export_type_field_in_party_master
 erpnext.patches.v11_0.rename_healthcare_service_unit_status_field
+erpnext.patches.v12_0.set_practitioner_name
