@@ -51,6 +51,7 @@
   "more_info",
   "patient_details",
   "ac_sb",
+  "receivable_account",
   "default_currency"
  ],
  "fields": [
@@ -126,6 +127,7 @@
   },
   {
    "default": "Active",
+   "fetch_if_empty": 0,
    "fieldname": "status",
    "fieldtype": "Select",
    "hidden": 1,
@@ -188,6 +190,7 @@
   },
   {
    "default": "0",
+   "fetch_if_empty": 0,
    "fieldname": "disabled",
    "fieldtype": "Check",
    "hidden": 1,
@@ -323,6 +326,7 @@
   },
   {
    "description": "Additional information regarding the patient",
+   "fetch_if_empty": 0,
    "fieldname": "patient_details",
    "fieldtype": "Text",
    "ignore_xss_filter": 1,
@@ -333,6 +337,12 @@
    "fieldname": "ac_sb",
    "fieldtype": "Section Break",
    "label": "Account Details"
+  },
+  {
+   "fieldname": "receivable_account",
+   "fieldtype": "Table",
+   "label": "Receivable Account",
+   "options": "Party Account",
   },
   {
    "fieldname": "default_currency",
@@ -347,7 +357,7 @@
  "icon": "fa fa-user",
  "image_field": "image",
  "max_attachments": 50,
- "modified": "2019-09-25 23:31:49.905893",
+ "modified": "2019-09-25 23:32:49.905893",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient",
