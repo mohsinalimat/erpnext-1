@@ -92,6 +92,30 @@ frappe.ui.form.on("Delivery Note", {
 			}, __('Create'));
 			frm.page.set_inner_btn_group_as_primary(__('Create'));
 		}
+	},
+	// Healthcare
+	patient: function(frm) {
+		if (frappe.boot.active_domains.includes("Healthcare")){
+			if(frm.doc.patient){
+				frappe.call({
+					method: "frappe.client.get_value",
+					args:{
+						doctype: "Patient",
+						filters: {"name": frm.doc.patient},
+						fieldname: "customer"
+					},
+					callback:function(r) {
+						if(r && r.message){
+							frm.set_value("customer", r.message.customer);
+							frm.refresh_fields();
+						}
+					}
+				});
+			}
+			else{
+					frm.set_value("customer", '');
+			}
+		}
 	}
 });
 
