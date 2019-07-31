@@ -52,7 +52,10 @@
   "patient_details",
   "ac_sb",
   "receivable_account",
-  "default_currency"
+  "default_currency",
+  "barcode_section",
+  "barcode_image",
+  "barcode_svg"
  ],
  "fields": [
   {
@@ -145,7 +148,7 @@
    "no_copy": 1,
    "print_hide": 1,
    "width": "50%"
-  },
+  }, 
   {
    "fieldname": "column_break_14",
    "fieldtype": "Column Break"
@@ -352,6 +355,24 @@
    "label": "Default Currency",
    "options": "Currency",
    "print_hide": 1
+  },
+  {
+   "fieldname": "barcode_section",
+   "fieldtype": "Section Break",
+   "hidden": 1,
+   "label": "Barcode"
+  },
+  {
+   "fieldname": "barcode_image",
+   "fieldtype": "Image",
+   "hidden": 1,
+   "label": "Barcode Image"
+  },
+  {
+   "fieldname": "barcode_svg",
+   "fieldtype": "Code",
+   "hidden": 1,
+   "label": "Barcode svg",
   }
  ],
  "icon": "fa fa-user",
@@ -387,7 +408,7 @@
    "role": "Physician",
    "share": 1,
    "write": 1
-  },
+  }, 
   {
    "create": 1,
    "delete": 1,
@@ -399,7 +420,7 @@
    "role": "Laboratory User",
    "share": 1,
    "write": 1
-  },
+  }, 
   {
    "create": 1,
    "delete": 1,
