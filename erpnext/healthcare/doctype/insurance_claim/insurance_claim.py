@@ -14,7 +14,8 @@ class InsuranceClaim(Document):
 	def on_update_after_submit(self):
 		if self.claim_status == "Claim Approved":
 			self.create_journal_entry_finished_submission()
-		frappe.db.set_value("Insurance Claim", self.name, "claim_status", "Claim Approved")
+		elif self.claim_status == "Claim Rejected":
+			self.create_journal_entry_rejected_submission()
 	def create_journal_entry_insurance_claim(self):
 			# create jv
 			sales_invoice = frappe.get_doc('Sales Invoice', self.sales_invoice)
@@ -43,7 +44,7 @@ class InsuranceClaim(Document):
 			journal_entry.set("accounts", accounts)
 			journal_entry.save(ignore_permissions = True)
 			journal_entry.submit()
-			frappe.db.set_value("Insurance Claim", self.name, "cliam_created__jv", journal_entry.name)
+			frappe.db.set_value("Insurance Claim", self.name, "claim_created_jv", journal_entry.name)
 
 	def create_journal_entry_finished_submission(self):
 			# create jv
@@ -73,3 +74,32 @@ class InsuranceClaim(Document):
 			journal_entry.submit()
 			frappe.db.set_value("Insurance Claim", self.name, "claim_submitted_jv", journal_entry.name)
 
+	def create_journal_entry_rejected_submission(self):
+			# create jv
+			sales_invoice = frappe.get_doc('Sales Invoice', self.sales_invoice)
+			insurance_company = frappe.get_doc('Insurance Company', self.insurance_company)
+			from erpnext.accounts.party import get_party_account
+			journal_entry = frappe.new_doc('Journal Entry')
+			journal_entry.voucher_type = 'Journal Entry'
+			journal_entry.company = insurance_company.company
+			journal_entry.posting_date =  nowdate()
+			accounts = []
+			tax_amount = 0.0
+			accounts.append({
+				"account": insurance_company.submission_claim_receivable_account,
+				"credit_in_account_currency":float(self.claim_amount-self.approved_amount),
+				"party_type": "Customer",
+				"party": insurance_company.customer
+			})
+			accounts.append({
+				"account": get_party_account("Customer", sales_invoice.customer, sales_invoice.company),
+				"debit_in_account_currency": float(self.claim_amount-self.approved_amount),
+				"party_type": "Customer",
+				"party": sales_invoice.customer,
+				"reference_type": sales_invoice.doctype,
+				"reference_name": sales_invoice.name
+			})
+			journal_entry.set("accounts", accounts)
+			journal_entry.save(ignore_permissions = True)
+			journal_entry.submit()
+			frappe.db.set_value("Insurance Claim", self.name, "claim_submitted_jv", journal_entry.name)
