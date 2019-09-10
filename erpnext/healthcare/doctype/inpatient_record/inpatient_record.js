@@ -302,7 +302,8 @@ var create_delivery_note = function(frm){
 		}
 	});
 	dialog.set_values({
-		'service_unit': frm.doc.current_service_unit
+		'service_unit': frm.doc.current_service_unit,
+		'warehouse': frm.doc.current_service_unit_warehouse
 	});
 	dialog.fields_dict["item"].get_query = function(){
 		return {
@@ -382,7 +383,7 @@ var create_delivery_note = function(frm){
 };
 
 var update_items = function(items, new_item){
-	if(new_item && new_item['item'] && new_item['qty'] && new_item['service_unit']){
+	if(new_item && new_item['item'] && new_item['qty'] && new_item['service_unit'] && new_item['warehouse']){
 		let item_exist_in_the_list = false;
 		$.each(items, function(index, item){
 			if(item['item'] == new_item['item']){
