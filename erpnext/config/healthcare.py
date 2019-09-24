@@ -184,6 +184,11 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Organism",
+					"label": _("Organism")
+				},
+				{
+					"type": "doctype",
 					"name": "Lab Test Template",
 					"label": _("Lab Test Template")
 				},
