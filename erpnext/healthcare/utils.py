@@ -1089,7 +1089,11 @@ def sales_item_details_for_healthcare_doc(item_code, doc, wh=None):
 		doc =  json.loads(doc)
 		if isinstance(doc, dict):
 			doc = frappe._dict(doc)
-	price_list = frappe.db.get_value("Selling Settings", None, "selling_price_list")
+	price_list = False
+	if frappe.get_meta(doc.doctype).has_field("selling_price_list"):
+		price_list = doc.selling_price_list
+	if not price_list:
+		price_list = frappe.db.get_value("Selling Settings", None, "selling_price_list")
 	if not price_list:
 		price_list = frappe.db.get_values("Price List", {"selling": 1}, ['name'])[0]
 	price_list_currency = frappe.db.get_values("Price List", {"selling": 1, "name": price_list}, ['name', 'currency'])[0]
