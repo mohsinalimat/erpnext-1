@@ -1012,16 +1012,25 @@ def get_insurance_details(insurance, service_item, patient):
 	discount = 0
 	coverage = 0
 	healthcare_insurance = frappe.get_doc("Insurance Assignment", insurance)
+	service_item_group = frappe.get_value("Item", service_item, "item_group")
 	if healthcare_insurance and valid_insurance(healthcare_insurance.name,nowdate()):
-		price_list = frappe.db.get_value("Insurance Contract", healthcare_insurance.insurance_contract , "price_list")
+		insurance_contract = frappe.get_doc("Insurance Contract",
+			{
+				"insurance_company": healthcare_insurance.insurance_company,
+				"is_active": 1
+			}
+		)
 		item_price = frappe.db.exists("Item Price",
 		{
 			'item_code': service_item,
-			'price_list': price_list
+			'price_list': insurance_contract.price_list
 		})
 		if item_price:
+			discount = insurance_contract.discount
+			for item in insurance_contract.insurance_contract_discount:
+				if service_item_group== item.item_group:
+					discount=item.discount
 			rate= frappe.db.get_value("Item Price", item_price, 'price_list_rate')
-			discount = healthcare_insurance.discount
 			coverage = healthcare_insurance.coverage
 			if patient.inpatient_record and healthcare_insurance.ip_coverage:
 				coverage = healthcare_insurance.ip_coverage
