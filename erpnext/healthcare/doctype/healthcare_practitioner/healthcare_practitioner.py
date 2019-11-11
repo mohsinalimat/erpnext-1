@@ -87,7 +87,7 @@ def validate_service_item(item, msg):
 
 def get_practitioner_list(doctype, txt, searchfield, start, page_len, filters=None):
 	fields = ["name", "practitioner_name", "mobile_phone"]
-	
+
 	filters = {
 		'name': ("like", "%%%s%%" % txt)
 	}
