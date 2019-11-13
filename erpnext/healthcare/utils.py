@@ -1251,7 +1251,10 @@ def get_revenue_sharing_distribution(invoice_items):
 							item_group=frappe.db.get_value("Item", item.item_code, "item_group")
 							for sharing_item in assignment_doc.revenue_sharing_items:
 								if sharing_item.item_group==item_group:
-									distribute_amount=(item.amount* 0.01 * sharing_item.direct_percentage)
+									if sharing_item.type_of_sharing=="Fixed":
+										distribute_amount=direct_amount
+									else:
+										distribute_amount=(item.amount* 0.01 * sharing_item.direct_percentage)
 						distribution = {
 							'item_code': item.item_code,
 							'item_amount': item.amount,
@@ -1276,7 +1279,10 @@ def get_revenue_sharing_distribution(invoice_items):
 							item_group=frappe.db.get_value("Item", item.item_code, "item_group")
 							for sharing_item in assignment_doc.revenue_sharing_items:
 								if sharing_item.item_group==item_group:
-									distribute_amount=(item.amount* 0.01 * sharing_item.referral_percentage)
+									if sharing_item.type_of_sharing=="Fixed":
+										distribute_amount=referral_amount
+									else:
+										distribute_amount=(item.amount* 0.01 * sharing_item.referral_percentage)
 							distribution = {
 							'item_code': item.item_code,
 							'item_amount': item.amount,
@@ -1291,7 +1297,10 @@ def get_revenue_sharing_distribution(invoice_items):
 							item_group=frappe.db.get_value("Item", item.item_code, "item_group")
 							for sharing_item in assignment_doc.revenue_sharing_items:
 								if sharing_item.item_group==item_group:
-									distribute_amount=(item.amount* 0.01 * sharing_item.direct_percentage)
+									if sharing_item.type_of_sharing=="Fixed":
+										distribute_amount=direct_amount
+									else:
+										distribute_amount=(item.amount* 0.01 * sharing_item.direct_percentage)
 							distribution = {
 							'item_code': item.item_code,
 							'item_amount': item.amount,
@@ -1315,7 +1324,10 @@ def get_revenue_sharing_distribution(invoice_items):
 							item_group=frappe.db.get_value("Item", item.item_code, "item_group")
 							for sharing_item in assignment_doc.revenue_sharing_items:
 								if sharing_item.item_group==item_group:
-									distribute_amount=(item.amount* 0.01 * sharing_item.referral_percentage)
+									if sharing_item.type_of_sharing=="Fixed":
+										distribute_amount=referral_amount
+									else:
+										distribute_amount=(item.amount* 0.01 * sharing_item.referral_percentage)
 						distribution = {
 						'item_code': item.item_code,
 						'item_amount': item.amount,
