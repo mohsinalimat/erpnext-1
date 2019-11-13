@@ -345,7 +345,7 @@
    "fieldname": "receivable_account",
    "fieldtype": "Table",
    "label": "Receivable Account",
-   "options": "Party Account",
+   "options": "Party Account"
   },
   {
    "fieldname": "default_currency",
@@ -372,7 +372,7 @@
    "fieldname": "barcode_svg",
    "fieldtype": "Code",
    "hidden": 1,
-   "label": "Barcode svg",
+   "label": "Barcode svg"
   }
  ],
  "icon": "fa fa-user",
