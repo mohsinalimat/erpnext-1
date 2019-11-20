@@ -72,7 +72,6 @@
    "read_only": 1
   },
   {
-   "fetch_from": "inpatient_record.patient",
    "fieldname": "patient",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
@@ -439,7 +438,7 @@
    "report_hide": 1
   }
  ],
- "modified": "2019-11-19 07:47:19.745650",
+ "modified": "2019-11-20 15:19:03.932497",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Appointment",
