@@ -171,12 +171,12 @@
    "fieldname": "modality",
    "fieldtype": "Data",
    "label": "Modality",
-   "read_only": 1,
+   "read_only": 1
   },
   {
    "fieldname": "notes",
    "fieldtype": "Small Text",
-   "label": "Notes",
+   "label": "Notes"
   },
   {
    "fieldname": "service_unit",
