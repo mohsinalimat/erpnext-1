@@ -85,12 +85,37 @@ def validate_service_item(item, msg):
 	if frappe.db.get_value("Item", item, "is_stock_item") == 1:
 		frappe.throw(_(msg))
 
-def get_practitioner_list(doctype, txt, searchfield, start, page_len, filters=None):
+def get_practitioner_list(doctype, txt, searchfield, start, page_len, filters):
+	from frappe.desk.reportview import get_match_cond, get_filters_cond
+	conditions = []
 	fields = ["name", "practitioner_name", "mobile_phone"]
 
-	filters = {
-		'name': ("like", "%%%s%%" % txt)
-	}
+	meta = frappe.get_meta("Healthcare Practitioner")
+	searchfields = meta.get_search_fields()
+	searchfields = searchfields + [f for f in [searchfield or "name", "practitioner_name"] \
+			if not f in searchfields]
+	fields = fields + [f for f in searchfields if not f in fields]
 
-	return frappe.get_all("Healthcare Practitioner", fields = fields,
-		filters = filters, start=start, page_length=page_len, order_by="name, practitioner_name", as_list=1)
+	fields = ", ".join(fields)
+	searchfields = " or ".join([field + " like %(txt)s" for field in searchfields])
+
+	return frappe.db.sql("""select {fields} from `tabHealthcare Practitioner`
+		where docstatus < 2
+			and ({scond}) and active=1
+			{fcond} {mcond}
+		order by
+			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
+			if(locate(%(_txt)s, practitioner_name), locate(%(_txt)s, practitioner_name), 99999),
+			idx desc,
+			name, practitioner_name
+		limit %(start)s, %(page_len)s""".format(**{
+			"fields": fields,
+			"scond": searchfields,
+			"mcond": get_match_cond(doctype),
+			"fcond": get_filters_cond(doctype, filters, conditions).replace('%', '%%'),
+		}), {
+			'txt': "%%%s%%" % txt,
+			'_txt': txt.replace("%", ""),
+			'start': start,
+			'page_len': page_len
+		})
