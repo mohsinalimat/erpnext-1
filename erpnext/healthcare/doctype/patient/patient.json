@@ -22,6 +22,7 @@
   "status",
   "image",
   "column_break_14",
+  "customer_group",
   "customer",
   "report_preference",
   "mobile",
@@ -152,6 +153,13 @@
   {
    "fieldname": "column_break_14",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "customer_group",
+   "fieldtype": "Link",
+   "label": "Customer Group",
+   "options": "Customer Group",
+   "set_only_once": 1
   },
   {
    "fieldname": "customer",
@@ -329,7 +337,6 @@
   },
   {
    "description": "Additional information regarding the patient",
-   "fetch_if_empty": 0,
    "fieldname": "patient_details",
    "fieldtype": "Text",
    "ignore_xss_filter": 1,
@@ -378,7 +385,7 @@
  "icon": "fa fa-user",
  "image_field": "image",
  "max_attachments": 50,
- "modified": "2019-09-28 23:32:49.905893",
+ "modified": "2019-12-05 17:39:49.012033",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient",
@@ -408,7 +415,7 @@
    "role": "Physician",
    "share": 1,
    "write": 1
-  }, 
+  },
   {
    "create": 1,
    "delete": 1,
@@ -420,7 +427,7 @@
    "role": "Laboratory User",
    "share": 1,
    "write": 1
-  }, 
+  },
   {
    "create": 1,
    "delete": 1,
