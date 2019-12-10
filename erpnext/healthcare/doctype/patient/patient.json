@@ -29,6 +29,10 @@
   "email",
   "phone",
   "disabled",
+  "contacts_and_address_section",
+  "address_html",
+  "column_break_21",
+  "contact_html",
   "sb_relation",
   "patient_relation",
   "allergy_medical_and_surgical_history",
@@ -149,7 +153,7 @@
    "no_copy": 1,
    "print_hide": 1,
    "width": "50%"
-  }, 
+  },
   {
    "fieldname": "column_break_14",
    "fieldtype": "Column Break"
@@ -209,6 +213,25 @@
    "no_copy": 1,
    "print_hide": 1,
    "report_hide": 1
+  },
+  {
+   "fieldname": "contacts_and_address_section",
+   "fieldtype": "Section Break",
+   "label": "Contacts and Address"
+  },
+  {
+   "fieldname": "address_html",
+   "fieldtype": "HTML",
+   "label": "Address HTML"
+  },
+  {
+   "fieldname": "column_break_21",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "contact_html",
+   "fieldtype": "HTML",
+   "label": "Contact HTML"
   },
   {
    "collapsible": 1,

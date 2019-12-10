@@ -39,9 +39,10 @@
   "column_break_17",
   "appointment_date",
   "appointment_time",
-  "practitioner_event", 
+  "practitioner_event",
   "section_break_16",
   "patient_name",
+  "companion",
   "patient_sex",
   "column_break_21",
   "patient_age",
@@ -321,6 +322,12 @@
    "fieldtype": "Data",
    "label": "Patient Name",
    "read_only": 1
+  },
+  {
+   "fieldname": "companion",
+   "fieldtype": "Link",
+   "label": "Companion",
+   "options": "Contact"
   },
   {
    "fetch_from": "patient.sex",
