@@ -96,7 +96,6 @@
    "report_hide": 1
   },
   {
-   "fetch_from": "inpatient_record.patient",
    "fieldname": "patient",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
@@ -369,7 +368,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2019-11-19 07:46:57.200532",
+ "modified": "2019-12-12 14:39:32.046352",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Encounter",
