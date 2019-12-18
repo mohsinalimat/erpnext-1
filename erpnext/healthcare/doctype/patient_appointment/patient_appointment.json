@@ -42,10 +42,18 @@
   "practitioner_event",
   "section_break_16",
   "patient_name",
-  "companion",
   "patient_sex",
   "column_break_21",
   "patient_age",
+  "patient_companion",
+  "section_break_39",
+  "companion_mobile",
+  "companion_name",
+  "companion_relation",
+  "column_break_42",
+  "companion_email",
+  "companion_id",
+  "companion",
   "section_break_1",
   "appointment_datetime",
   "mode_of_payment",
@@ -350,6 +358,68 @@
    "read_only": 1
   },
   {
+   "fieldname": "patient_companion",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Patient Companion"
+  },
+  {
+   "depends_on": "eval:doc.patient_companion",
+   "fetch_if_empty": 0,
+   "fieldname": "section_break_39",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fetch_from": "companion.mobile_no",
+   "fetch_if_empty": 1,
+   "fieldname": "companion_mobile",
+   "fieldtype": "Data",
+   "label": "Companion Mobile"
+  },
+  {
+   "depends_on": "eval:doc.companion_mobile",
+   "fetch_from": "companion.first_name",
+   "fetch_if_empty": 1,
+   "fieldname": "companion_name",
+   "fieldtype": "Data",
+   "label": "Companion Name"
+  },
+  {
+   "depends_on": "eval:doc.companion_mobile",
+   "fetch_from": "companion.companion_relation",
+   "fetch_if_empty": 1,
+   "fieldname": "companion_relation",
+   "fieldtype": "Select",
+   "label": "Companion Relation",
+   "options": "\nFather\nMother\nSister\nBrother\nSpouse\nBairn\nRelative\nFriend\nColleague\nOther"
+  },
+  {
+   "fieldname": "column_break_42",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.companion_mobile",
+   "fetch_from": "companion.email_id",
+   "fetch_if_empty": 1,
+   "fieldname": "companion_email",
+   "fieldtype": "Data",
+   "label": "Companion Email"
+  },
+  {
+   "depends_on": "eval:doc.companion_mobile",
+   "fetch_from": "companion.companion_id",
+   "fetch_if_empty": 1,
+   "fieldname": "companion_id",
+   "fieldtype": "Data",
+   "label": "Companion ID"
+  },
+  {
+   "fieldname": "companion",
+   "fieldtype": "Link",
+   "label": "Companion",
+   "options": "Contact"
+  },
+  {
    "fieldname": "section_break_1",
    "fieldtype": "Section Break",
    "set_only_once": 1
@@ -498,7 +568,7 @@
    "read_only": 1
   }
  ],
- "modified": "2020-01-07 14:27:11.635311",
+ "modified": "2020-01-22 14:27:11.635311",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Appointment",
