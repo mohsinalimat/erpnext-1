@@ -39,6 +39,7 @@
   "column_break_17",
   "appointment_date",
   "appointment_time",
+  "practitioner_event", 
   "section_break_16",
   "patient_name",
   "patient_sex",
@@ -304,6 +305,13 @@
    "read_only": 1
   },
   {
+   "fieldname": "practitioner_event",
+   "fieldtype": "Link",
+   "label": "Practitioner Event",
+   "options": "Practitioner Event",
+   "read_only": 1
+  },
+  {
    "fieldname": "section_break_16",
    "fieldtype": "Section Break"
   },
@@ -483,7 +491,7 @@
    "read_only": 1
   }
  ],
- "modified": "2019-11-28 19:14:37.627896",
+ "modified": "2020-01-07 14:27:11.635311",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Appointment",
