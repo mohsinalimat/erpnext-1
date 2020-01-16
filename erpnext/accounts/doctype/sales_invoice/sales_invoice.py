@@ -289,14 +289,6 @@ class SalesInvoice(SellingController):
 		if "Healthcare" in active_domains:
 			manage_invoice_submit_cancel(self, "on_cancel")
 
-	def after_insert(self):
-		# Healthcare
-		domain_settings = frappe.get_doc('Domain Settings')
-		active_domains = [d.domain for d in domain_settings.active_domains]
-		if "Healthcare" in active_domains and self.total_insurance_claim_amount:
-			self.patient_payable_amount=self.outstanding_amount-self.total_insurance_claim_amount
-			self.save(ignore_permissions=True)
-
 	def update_status_updater_args(self):
 		if cint(self.update_stock):
 			self.status_updater.append({
@@ -1212,9 +1204,13 @@ class SalesInvoice(SellingController):
 	def calculate_healthcare_insurance_claim(self):
 		total_claim_amount = 0
 		for item in self.items:
+			if item.amount and item.insurance_claim_coverage and float(item.insurance_claim_coverage) > 0:
+				item.insurance_claim_amount = item.amount * 0.01 * float(item.insurance_claim_coverage)
 			if item.insurance_claim_amount and float(item.insurance_claim_amount)>0:
 				total_claim_amount += float(item.insurance_claim_amount)
 		self.total_insurance_claim_amount = total_claim_amount
+		if self.total_insurance_claim_amount and self.outstanding_amount:
+			self.patient_payable_amount = self.outstanding_amount-self.total_insurance_claim_amount
 
 	def get_discounting_status(self):
 		status = None
