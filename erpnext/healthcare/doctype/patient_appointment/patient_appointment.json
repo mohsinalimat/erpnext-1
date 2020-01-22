@@ -332,12 +332,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "companion",
-   "fieldtype": "Link",
-   "label": "Companion",
-   "options": "Contact"
-  },
-  {
    "fetch_from": "patient.sex",
    "fieldname": "patient_sex",
    "fieldtype": "Data",
