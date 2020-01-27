@@ -1662,7 +1662,8 @@ def set_email_in_contact(contact, email_id):
 	if not email_linked:
 		email = contact.append("email_ids")
 		email.is_primary = True
-		email.email_id = contact.email_id
+		email.email_id = email_id
+	return contact
 
 def set_mobile_in_contact(contact, mobile_no):
 	mobile_linked = False
