@@ -1640,20 +1640,53 @@ def get_contact_details(mobile_no):
 			return ""
 
 @frappe.whitelist()
-def create_companion_contact(patient, companion_details):
-	contact_exist = frappe.db.exists("Contact", {'mobile_no': companion_details['mobile_no']})
-	if contact_exist:
-		contact=frappe.get_doc("Contact", contact_exist)
-	else:
-		contact=frappe.new_doc("Contact")
-		links=[]
-		links.append({
-			"link_doctype": "Patient",
-			"link_name": patient
-		})
-		contact.set("links", links)
+def create_companion_contact(patient, companion_details, mobile_no=False, email_id=False):
+	contact_exist = frappe.db.exists("Contact", {'mobile_no': mobile_no})
+	contact = frappe.get_doc("Contact", contact_exist) if contact_exist else frappe.new_doc("Contact")
 	contact = set_companion_details(contact, companion_details)
+	if email_id:
+		contact = set_email_in_contact(contact, email_id)
+	if mobile_no:
+		contact = set_mobile_in_contact(contact, mobile_no)
+	contact=link_contact_with_patient(patient, contact)
 	contact.save(ignore_permissions=True)
+	return contact
+
+def set_email_in_contact(contact, email_id):
+	email_linked = False
+	if contact.name:
+		for email in contact.email_ids:
+			if email.email_id == email_id:
+				email_linked = True
+				email.is_primary = True
+	if not email_linked:
+		email = contact.append("email_ids")
+		email.is_primary = True
+		email.email_id = contact.email_id
+
+def set_mobile_in_contact(contact, mobile_no):
+	mobile_linked = False
+	if contact.name:
+		for phone in contact.phone_nos:
+			if phone.phone == mobile_no:
+				mobile_linked = True
+				phone.is_primary_mobile_no = True
+	if not mobile_linked:
+		phone = contact.append("phone_nos")
+		phone.is_primary_mobile_no = True
+		phone.phone = mobile_no
+	return contact
+
+def link_contact_with_patient(patient, contact):
+	patient_linked = False
+	if contact.name:
+		for link in contact.links:
+			if link.link_doctype == "Patient" and link.link_name == patient:
+				patient_linked = True
+	if not patient_linked:
+		links=contact.append("links")
+		links.link_doctype = "Patient"
+		links.link_name = patient
 	return contact
 
 def set_companion_details(contact, companion_details):
