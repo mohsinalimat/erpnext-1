@@ -45,7 +45,6 @@
   "patient_sex",
   "column_break_21",
   "patient_age",
-  "patient_companion",
   "section_break_39",
   "companion_mobile",
   "companion_name",
@@ -352,16 +351,10 @@
    "read_only": 1
   },
   {
-   "fieldname": "patient_companion",
-   "fieldtype": "Check",
-   "hidden": 1,
-   "label": "Patient Companion"
-  },
-  {
-   "depends_on": "eval:doc.patient_companion",
-   "fetch_if_empty": 0,
+   "collapsible": 1,
    "fieldname": "section_break_39",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Patient Companion"
   },
   {
    "fetch_from": "companion.mobile_no",
@@ -371,7 +364,6 @@
    "label": "Companion Mobile"
   },
   {
-   "depends_on": "eval:doc.companion_mobile",
    "fetch_from": "companion.first_name",
    "fetch_if_empty": 1,
    "fieldname": "companion_name",
@@ -379,7 +371,6 @@
    "label": "Companion Name"
   },
   {
-   "depends_on": "eval:doc.companion_mobile",
    "fetch_from": "companion.companion_relation",
    "fetch_if_empty": 1,
    "fieldname": "companion_relation",
@@ -392,7 +383,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "eval:doc.companion_mobile",
    "fetch_from": "companion.email_id",
    "fetch_if_empty": 1,
    "fieldname": "companion_email",
@@ -400,7 +390,6 @@
    "label": "Companion Email"
   },
   {
-   "depends_on": "eval:doc.companion_mobile",
    "fetch_from": "companion.companion_id",
    "fetch_if_empty": 1,
    "fieldname": "companion_id",
@@ -562,7 +551,7 @@
    "read_only": 1
   }
  ],
- "modified": "2020-01-22 19:47:11.635311",
+ "modified": "2020-01-30 11:50:18.225922",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Appointment",
