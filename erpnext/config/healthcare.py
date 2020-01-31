@@ -119,6 +119,11 @@ def get_data():
 					"type": "doctype",
 					"name": "Healthcare Service Unit",
 					"label": _("Healthcare Service Unit")
+				},
+				{
+					"type": "doctype",
+					"name": "Practitioner Event Type",
+					"label": _("Practitioner Event Type")
 				}
 			]
 		},
