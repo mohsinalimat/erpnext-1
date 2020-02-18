@@ -11,7 +11,7 @@ import dateutil
 from frappe.contacts.address_and_contact import load_address_and_contact, delete_contact_and_address
 from frappe.model.naming import set_name_by_naming_series
 from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_receivable_account,get_income_account,send_registration_sms
-from erpnext.healthcare.utils import get_patient_primary_contact
+from erpnext.healthcare.utils import get_patient_primary_contact, set_email_in_contact, set_mobile_in_contact
 class Patient(Document):
 	def after_insert(self):
 		if(frappe.db.get_value("Healthcare Settings", None, "manage_customer") == '1' and not self.customer):
@@ -60,6 +60,7 @@ class Patient(Document):
 					contact.is_primary_contact= True
 					if self.mobile:
 						contact.mobile=self.mobile
+						contact = set_mobile_in_contact(contact, self.mobile)
 					links=[]
 					links.append({
 						"link_doctype": "Patient",
@@ -70,6 +71,7 @@ class Patient(Document):
 						"link_name": self.customer
 					})
 					contact.set("links", links)
+					contact = set_email_in_contact(contact, self.email)
 					contact.save(ignore_permissions=True)
 			else:
 				create_new_contact(self)
@@ -160,6 +162,7 @@ def create_new_contact(doc):
 		contact.first_name=doc.patient_name
 		if doc.mobile:
 			contact.mobile=doc.mobile
+			contact = set_mobile_in_contact(contact, doc.mobile)
 		contact.gender=doc.sex
 		contact.status="Passive"
 		contact.is_primary_contact= True
@@ -173,6 +176,8 @@ def create_new_contact(doc):
 			"link_name": doc.customer
 		})
 		contact.set("links", links)
+		if doc.email:
+			contact = set_email_in_contact(contact, doc.email)
 		contact.insert(ignore_permissions=True)
 
 
