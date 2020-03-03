@@ -10,12 +10,14 @@ frappe.ui.form.on('Insurance Contract', {
 				}
 			};
 		});
-		if(frm.is_new){
+		if(frm.doc.__islocal){
 			frm.set_value("start_date", frappe.datetime.get_today())
 		}
 	},
 	start_date: function(frm){
-		var to_date=frappe.datetime.add_days(frm.doc.start_date, 365)
-		frm.set_value("end_date", to_date);
+		if(frm.doc.start_date){
+			var to_date=frappe.datetime.add_days(frm.doc.start_date, 365)
+			frm.set_value("end_date", to_date);
+		}
 	}
 });
