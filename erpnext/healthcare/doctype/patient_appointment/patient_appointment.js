@@ -671,6 +671,16 @@ var check_and_set_availability = function(frm) {
 												let slot_start_time = moment(slot.from_time, 'HH:mm:ss');
 												let slot_to_time = moment(slot.to_time, 'HH:mm:ss');
 												let interval = (slot_to_time - slot_start_time)/60000 | 0;
+												//checking current time in solt
+												var today = frappe.datetime.nowdate();
+												if(today == d.get_value('appointment_date')){
+													// disable before  current  time in current date
+													var curr_time= moment(frappe.datetime.now_time(), 'HH:mm:ss');
+													if(slot_start_time.isBefore(curr_time)){
+														disabled = 'disabled="disabled"';
+														background_color = "#A1A1A1";
+													}
+												}
 												//iterate in all booked appointments, update the start time and duration
 												slot_details[i].appointments.forEach(function(booked) {
 													let booked_moment = moment(booked.appointment_time, 'HH:mm:ss');
@@ -754,6 +764,16 @@ var check_and_set_availability = function(frm) {
 												let slot_start_time = moment(slot.from_time, 'HH:mm:ss');
 												let slot_to_time = moment(slot.to_time, 'HH:mm:ss');
 												let interval = (slot_to_time - slot_start_time)/60000 | 0;
+												//checking current time in solt
+												var today = frappe.datetime.nowdate();
+												if(today == d.get_value('appointment_date')){
+													// disable before  current  time in current date
+													var curr_time= moment(frappe.datetime.now_time(), 'HH:mm:ss');
+													if(slot_start_time.isBefore(curr_time)){
+														disabled = 'disabled="disabled"';
+														background_color = "#A1A1A1";
+													}
+												}
 												//iterate in all booked appointments, update the start time and duration
 												present_events[i].appointments.forEach(function(booked) {
 													let booked_moment = moment(booked.appointment_time, 'HH:mm:ss');
