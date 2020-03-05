@@ -663,3 +663,4 @@ erpnext.patches.v12_0.healthcare_lab_test_normal_range_redesign
 erpnext.patches.v12_0.revenue_sharing_fields_for_sales_invoice
 erpnext.patches.v12_0.insurance_assignment_in_sales_invoice
 erpnext.patches.v12_0.patient_companion_field_in_contact
+erpnext.patches.v12_0.add_field_validate_insurance_on_invoice

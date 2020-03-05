@@ -403,7 +403,9 @@ def update_ip_occupancy_invoice(sales_invoice, inpatient_occupancy, service_unit
 	item_line.rate = item_details.price_list_rate
 	if ip.insurance and item_line.item_code:
 		patient_doc= frappe.get_doc("Patient", ip.patient)
-		insurance_details = get_insurance_details(ip.insurance, item_line.item_code, patient_doc)
+		validate_insurance_on_invoice= frappe.db.get_value("Healthcare Settings", None, "validate_insurance_on_invoice")
+		valid_date = ip.scheduled_date if validate_insurance_on_invoice=="1" else getdate()
+		insurance_details = get_insurance_details(ip.insurance, item_line.item_code, patient_doc, valid_date)
 		if insurance_details:
 			item_line.discount_percentage = insurance_details.discount
 			if insurance_details.rate and insurance_details.rate > 0:

@@ -462,7 +462,9 @@ def invoice_clinical_procedure(procedure):
 	item_line.rate = float(procedure.standard_selling_rate) - reduce_from_procedure_rate
 	if procedure.insurance and item_line.item_code:
 		patient_doc= frappe.get_doc("Patient", procedure.patient)
-		insurance_details = get_insurance_details(procedure.insurance, item_line.item_code, patient_doc)
+		validate_insurance_on_invoice= frappe.db.get_value("Healthcare Settings", None, "validate_insurance_on_invoice")
+		valid_date = procedure.start_date if validate_insurance_on_invoice=="1" else getdate()
+		insurance_details = get_insurance_details(procedure.insurance, item_line.item_code, patient_doc, valid_date)
 		if insurance_details:
 			item_line.discount_percentage = insurance_details.discount
 			if insurance_details.rate and insurance_details.rate > 0:

@@ -454,6 +454,8 @@ def invoice_lab_test(lab_test):
 	if lab_test.insurance and item_line.item_code:
 		from erpnext.healthcare.utils import get_insurance_details
 		patient_doc= frappe.get_doc("Patient", lab_test.patient)
+		validate_insurance_on_invoice= frappe.db.get_value("Healthcare Settings", None, "validate_insurance_on_invoice")
+		valid_date = lab_test.submitted_date if validate_insurance_on_invoice=="1" else getdate()
 		insurance_details = get_insurance_details(lab_test.insurance, item_line.item_code, patient_doc)
 		if insurance_details:
 			item_line.discount_percentage = insurance_details.discount
@@ -518,7 +520,7 @@ def set_revenue_sharing_item(doc, dist_line, practitioner_charge_item, reference
 	if reference_doc.insurance and item_line.item_code:
 		from erpnext.healthcare.utils import get_insurance_details
 		patient_doc= frappe.get_doc("Patient", doc.patient)
-		insurance_details = get_insurance_details(reference_doc.insurance, item_line.item_code, patient_doc)
+		insurance_details = get_insurance_details(reference_doc.insurance, item_line.item_code, patient_doc, getdate())
 		if insurance_details:
 			item_line.insurance_claim_coverage = insurance_details.coverage
 			item_line.insurance_approval_number=  reference_doc.insurance_approval_number if reference_doc.insurance_approval_number else ''

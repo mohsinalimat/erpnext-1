@@ -1616,7 +1616,7 @@ def set_revenue_sharing_item(doc, dist_line, practitioner_charge_item, reference
 	if reference_doc.insurance and item_line.item_code:
 		from erpnext.healthcare.utils import get_insurance_details
 		patient_doc= frappe.get_doc("Patient", doc.patient)
-		insurance_details = get_insurance_details(reference_doc.insurance, item_line.item_code, patient_doc)
+		insurance_details = get_insurance_details(reference_doc.insurance, item_line.item_code, patient_doc, doc.posting_date)
 		if insurance_details:
 			item_line.insurance_claim_coverage = insurance_details.coverage
 			item_line.insurance_approval_number=  reference_doc.insurance_approval_number if reference_doc.insurance_approval_number else ''

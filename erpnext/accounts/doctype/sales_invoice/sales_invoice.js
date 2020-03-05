@@ -32,6 +32,15 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			me.frm.script_manager.trigger("is_pos");
 			me.frm.refresh_fields();
 		}
+		if (frappe.boot.active_domains.includes("Healthcare")){
+			if(me.frm.doc.__islocal){
+				frappe.db.get_value("Healthcare Settings", "", 'validate_insurance_on_invoice', function(r) {
+					if(r && r.validate_insurance_on_invoice){
+						me.frm.set_value('validate_insurance_on_invoice', r.validate_insurance_on_invoice)
+					}
+				});
+			}
+		}
 	},
 
 	refresh: function(doc, dt, dn) {
@@ -800,7 +809,9 @@ frappe.ui.form.on('Sales Invoice', {
 				frappe.call({
 					method: "erpnext.healthcare.utils.get_insurance_pricelist",
 					args: {
-						"insurance": frm.doc.insurance
+						"insurance": frm.doc.insurance,
+						"posting_date": frm.doc.posting_date,
+						"validate_insurance_on_invoice": frm.doc.validate_insurance_on_invoice
 					},
 					callback:function(r) {
 						if(r && r.message){
@@ -846,11 +857,12 @@ frappe.ui.form.on('Sales Invoice', {
 				},"Get items from");
 			}
 			frm.set_query("insurance", function(){
+				var filters={"patient": frm.doc.patient,"docstatus":1};
+				if(!frm.doc.validate_insurance_on_invoice){
+					filters["end_date"]=frm.doc.posting_date;
+				}
 				return{
-					filters:{
-						"patient": frm.doc.patient,
-						"docstatus":1
-					}
+					filters:filters
 				};
 			});
 		}
@@ -934,7 +946,7 @@ var set_insurance_details_for_insurance_item = function(frm, cdt, cdn){
 	if(frm.doc.insurance && d.item_code && d.insurance_item){
 		frappe.call({
 			method: "erpnext.healthcare.utils.get_insurance_details_for_si",
-			args:{'insurance': frm.doc.insurance, 'service_item': d.item_code, 'patient': frm.doc.patient},
+			args:{'insurance': frm.doc.insurance, 'service_item': d.item_code, 'patient': frm.doc.patient, valid_date: frm.doc.posting_date},
 			callback: function(r){
 				if(r.message){
 					frappe.model.set_value(cdt, cdn, "discount_percentage", r.message.discount);
@@ -1064,7 +1076,7 @@ var get_healthcare_services_to_invoice = function(frm) {
 			selected_insurance = '';
 			selected_patient = patient;
 			var method = "erpnext.healthcare.utils.get_healthcare_services_to_invoice";
-			var args = {patient: patient, insurance: ''};
+			var args = {patient: patient, posting_date:frm.doc.posting_date, validate_insurance_on_invoice:frm.doc.validate_insurance_on_invoice, insurance: '',};
 			var columns = {"item_code": "Service", "item_name": "Item Name", "reference_dn": "Reference Name", "reference_dt": "Reference Type"};
 			get_healthcare_items(frm, true, $results, $placeholder, method, args, columns);
 		}
@@ -1081,7 +1093,7 @@ var get_healthcare_services_to_invoice = function(frm) {
 		if(patient && dialog.get_value('insurance') != selected_insurance){
 			selected_insurance = dialog.get_value('insurance')
 			var method = "erpnext.healthcare.utils.get_healthcare_services_to_invoice";
-			var args = {patient: patient, insurance: dialog.get_value('insurance') };
+			var args = {patient: patient, posting_date:frm.doc.posting_date, validate_insurance_on_invoice:frm.doc.validate_insurance_on_invoice, insurance: dialog.get_value('insurance'),};
 			var columns = {"item_code": "Service", "item_name": "Item Name", "reference_dn": "Reference Name", "reference_dt": "Reference Type"};
 			get_healthcare_items(frm, true, $results, $placeholder, method, args, columns);
 		}
@@ -1254,7 +1266,7 @@ var get_drugs_to_invoice = function(frm) {
 		if(encounter && encounter!=selected_encounter){
 			selected_encounter = encounter;
 			var method = "erpnext.healthcare.utils.get_drugs_to_invoice";
-			var args = {encounter: encounter};
+			var args = {encounter: encounter, posting_date:frm.doc.posting_date, validate_insurance_on_invoice:frm.doc.validate_insurance_on_invoice};
 			var columns = {"item_code": "Drug Code", "item_name": "Item Name", "qty": "quantity", "description": "description"};
 			get_healthcare_items(frm, false, $results, $placeholder, method, args, columns);
 		}

@@ -76,6 +76,10 @@ data = {
 				'fieldname': 'healthcare_insurance_pricelist', 'label': 'Healthcare Insurance PriceList ', 'fieldtype': 'Link', 'options': 'Price List',
 				'insert_after': 'selling_price_list', 'read_only':True
 			},
+			{
+				'fieldname': 'validate_insurance_on_invoice', 'label': 'Skip Verifying Insurance Validity against Posting Date', 'fieldtype': 'Check',
+				'insert_after': 'ref_practitioner'
+			}
 		],
 		'Sales Invoice Item': [
 			{
