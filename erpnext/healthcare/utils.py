@@ -14,7 +14,7 @@ from erpnext.healthcare.doctype.lab_test.lab_test import create_multiple
 from erpnext.stock.get_item_details import get_item_details
 
 @frappe.whitelist()
-def get_healthcare_services_to_invoice(patient, posting_date, validate_insurance_on_invoice, insurance=None):
+def get_healthcare_services_to_invoice(patient, posting_date, validate_insurance_on_invoice=False, insurance=None):
 	patient = frappe.get_doc("Patient", patient)
 	if patient:
 		include_in_insurance = True if insurance else False
