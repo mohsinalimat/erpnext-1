@@ -610,9 +610,9 @@ var check_and_set_availability = function(frm) {
 				selected_appointment_date = d.get_value('appointment_date');
 				var today = frappe.datetime.nowdate();
 				if(today > selected_appointment_date){
-					frappe.db.get_value("Healthcare Settings", "", "role_booking_appointment_past_date", function(r) {
-						if(r && r.role_booking_appointment_past_date){
-							if(frappe.user.has_role(r.role_booking_appointment_past_date)){
+					frappe.db.get_value("Healthcare Settings", "", "appointment_administrator", function(r) {
+						if(r && r.appointment_administrator){
+							if(frappe.user.has_role(r.appointment_administrator)){
 								show_slots(d, fd);
 							}
 							else{
