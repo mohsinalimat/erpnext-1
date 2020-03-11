@@ -610,8 +610,21 @@ var check_and_set_availability = function(frm) {
 				selected_appointment_date = d.get_value('appointment_date');
 				var today = frappe.datetime.nowdate();
 				if(today > selected_appointment_date){
-					frappe.msgprint(__("You cannot book appointments for past date"));
-					fd.available_slots.html(__("You cannot book appointments for past date").bold());
+					frappe.db.get_value("Healthcare Settings", "", "role_booking_appointment_past_date", function(r) {
+						if(r && r.role_booking_appointment_past_date){
+							if(frappe.user.has_role(r.role_booking_appointment_past_date)){
+								show_slots(d, fd);
+							}
+							else{
+								frappe.msgprint(__("You cannot book appointments for past date"));
+								fd.available_slots.html(__("You cannot book appointments for past date").bold());
+							}
+						}
+						else{
+							frappe.msgprint(__("You cannot book appointments for past date"));
+							fd.available_slots.html(__("You cannot book appointments for past date").bold());
+						}
+					});
 				}
 				else
 				{
