@@ -527,7 +527,7 @@ var check_and_set_availability = function(frm) {
 				{ fieldtype: 'Link', options: 'Healthcare Practitioner', reqd:1, fieldname: 'practitioner', label: 'Healthcare Practitioner'},
 				{ fieldtype: 'Column Break'},
 				{ fieldtype: 'Link', options: 'Appointment Type', reqd:1, fieldname: 'appointment_type', label: 'Appointment Type'},
-				{ fieldtype: 'Int', fieldname: 'duration', label: 'Duration'},
+				{ fieldtype: 'Int', fieldname: 'duration', label: 'Duration', read_only:1},
 				{ fieldtype: 'Column Break'},
 				{ fieldtype: 'Date', reqd:1, fieldname: 'appointment_date', label: 'Date'},
 				{ fieldtype: 'Section Break'},
