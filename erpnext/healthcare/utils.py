@@ -851,7 +851,7 @@ def get_drugs_to_invoice(encounter, posting_date, validate_insurance_on_invoice)
 						else:
 							item_to_invoice.append({'reference_dt': 'Drug Prescription', 'reference_dn': drug_line.name, 'item_name': item_name,
 							'item_code': drug_line.drug_code, 'qty': qty, 'description': description})
-				return item_to_invoice
+				return item_to_invoice, False
 
 @frappe.whitelist()
 def get_children(doctype, parent, company, is_root=False):
@@ -1506,7 +1506,7 @@ def get_revenue_sharing_distribution(invoice_item):
 					assignment_doc=frappe.get_doc("Healthcare Service Profile Assignment", assignment)
 					if assignment_doc:
 						distribute_amount=0
-						item_amount= item.rate * item.qty
+						item_amount = float(item.rate) * float(item.qty)
 						if assignment_doc.revenue_sharing_items:
 							item_group=frappe.db.get_value("Item", item.item_code, "item_group")
 							for sharing_item in assignment_doc.revenue_sharing_items:
