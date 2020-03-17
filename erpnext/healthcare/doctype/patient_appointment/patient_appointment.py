@@ -94,35 +94,37 @@ class PatientAppointment(Document):
 			frappe.db.set_value("Inpatient Record Procedure", self.inpatient_record_procedure, "appointment_booked", True)
 		elif self.radiology_procedure_prescription:
 			frappe.db.set_value("Radiology Procedure Prescription", self.radiology_procedure_prescription, "appointment_booked", True)
-		from erpnext.healthcare.utils import get_practitioner_charge
-		is_ip = True if self.inpatient_record else False
-		practitioner_charge = get_practitioner_charge(self.practitioner, is_ip, self.practitioner_event, self.appointment_type)
-		# Check fee validity exists
-		appointment = self
-		validity_exist = validity_exists(appointment.practitioner, appointment.patient)
-		if validity_exist and practitioner_charge:
-			fee_validity = frappe.get_doc("Fee Validity", validity_exist[0][0])
+		if not self.procedure_template and not self.radiology_procedure:
+			from erpnext.healthcare.utils import get_practitioner_charge
+			is_ip = True if self.inpatient_record else False
+			practitioner_charge = get_practitioner_charge(self.practitioner, is_ip, self.practitioner_event, self.appointment_type)
+			# Check fee validity exists
+			appointment = self
+			validity_exist = validity_exists(appointment.practitioner, appointment.patient)
+			if validity_exist and practitioner_charge:
+				fee_validity = frappe.get_doc("Fee Validity", validity_exist[0][0])
 
-			# Check if the validity is valid
-			appointment_date = getdate(appointment.appointment_date)
-			if (fee_validity.valid_till >= appointment_date) and (fee_validity.visited < fee_validity.max_visit):
-				visited = fee_validity.visited + 1
-				frappe.db.set_value("Fee Validity", fee_validity.name, "visited", visited)
-				if fee_validity.ref_invoice:
-					frappe.db.set_value("Patient Appointment", appointment.name, "invoiced", True)
-				frappe.msgprint(_("{0} has fee validity till {1}").format(appointment.patient, fee_validity.valid_till))
-		elif not practitioner_charge:
-			frappe.db.set_value("Patient Appointment", appointment.name, "invoiced", True)
+				# Check if the validity is valid
+				appointment_date = getdate(appointment.appointment_date)
+				if (fee_validity.valid_till >= appointment_date) and (fee_validity.visited < fee_validity.max_visit):
+					visited = fee_validity.visited + 1
+					frappe.db.set_value("Fee Validity", fee_validity.name, "visited", visited)
+					if fee_validity.ref_invoice:
+						frappe.db.set_value("Patient Appointment", appointment.name, "invoiced", True)
+					frappe.msgprint(_("{0} has fee validity till {1}").format(appointment.patient, fee_validity.valid_till))
+			elif not practitioner_charge:
+				frappe.db.set_value("Patient Appointment", appointment.name, "invoiced", True)
+
+			if frappe.db.get_value("Healthcare Settings", None, "manage_appointment_invoice_automatically") == '1' and \
+				frappe.db.get_value("Patient Appointment", self.name, "invoiced") != 1:
+				sales_invoice = invoice_appointment(self, True)
+				sales_invoice.submit()
+				frappe.msgprint(_("Sales Invoice {0} created".format(sales_invoice.name)), alert=True)
+
+			elif self.inpatient_record and frappe.db.get_value("Healthcare Settings", None, "auto_invoice_inpatient") == '1':
+				invoice_appointment(self, False)
+		#Alert
 		confirm_sms(self)
-
-		if frappe.db.get_value("Healthcare Settings", None, "manage_appointment_invoice_automatically") == '1' and \
-			frappe.db.get_value("Patient Appointment", self.name, "invoiced") != 1:
-			sales_invoice = invoice_appointment(self, True)
-			sales_invoice.submit()
-			frappe.msgprint(_("Sales Invoice {0} created".format(sales_invoice.name)), alert=True)
-
-		elif self.inpatient_record and frappe.db.get_value("Healthcare Settings", None, "auto_invoice_inpatient") == '1':
-			invoice_appointment(self, False)
 
 @frappe.whitelist()
 def invoice_appointment(appointment_doc, is_pos):
