@@ -930,6 +930,8 @@ frappe.ui.form.on('Sales Invoice Timesheet', {
 frappe.ui.form.on('Sales Invoice Item', {
 	item_code: function(frm, cdt, cdn){
 		if (frappe.boot.active_domains.includes("Healthcare")){
+			frappe.model.set_value(cdt, cdn, "reference_dt", '');
+			frappe.model.set_value(cdt, cdn, "reference_dn", '');
 			set_insurance_item(frm, cdt, cdn);
 		}
 	},
