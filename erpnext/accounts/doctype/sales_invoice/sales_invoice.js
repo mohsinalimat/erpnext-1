@@ -877,7 +877,7 @@ frappe.ui.form.on('Sales Invoice', {
 			frm.set_query("insurance", function(){
 				var filters={"patient": frm.doc.patient,"docstatus":1};
 				if(!frm.doc.validate_insurance_on_invoice){
-					filters["end_date"]=frm.doc.posting_date;
+					filters["end_date"]=['>=', frm.doc.posting_date]
 				}
 				return{
 					filters:filters
