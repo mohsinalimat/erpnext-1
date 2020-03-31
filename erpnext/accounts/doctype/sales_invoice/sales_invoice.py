@@ -156,6 +156,10 @@ class SalesInvoice(SellingController):
 
 	def before_save(self):
 		set_account_for_mode_of_payment(self)
+		# Healthcare Service Invoice.
+		if self.items:
+			for item in self.items:
+				set_revenue_sharing_distribution(self, self.items)
 
 	def on_submit(self):
 		self.validate_pos_paid_amount()
