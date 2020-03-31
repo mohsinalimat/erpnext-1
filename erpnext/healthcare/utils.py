@@ -12,6 +12,7 @@ from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import g
 from erpnext.healthcare.doctype.fee_validity.fee_validity import create_fee_validity, update_fee_validity
 from erpnext.healthcare.doctype.lab_test.lab_test import create_multiple
 from erpnext.stock.get_item_details import get_item_details
+from frappe.desk.reportview import get_match_cond
 
 @frappe.whitelist()
 def get_healthcare_services_to_invoice(patient, posting_date, validate_insurance_on_invoice=False, insurance=None):
@@ -1723,3 +1724,24 @@ def set_companion_details(contact, companion_details):
 		contact.set(key, companion_details[key] if companion_details[key] else '')
 	contact.patient_companion=True
 	return contact
+
+def get_practitioner_appointment_type(doctype, txt, searchfield, start, page_len, filters):
+	parent = filters['parent']
+	if parent and frappe.db.get_value("Healthcare Practitioner", parent, "healthcare_practitioner_type") == "External":
+		query = """select name from `tabAppointment Type` where appointment_type like %(txt)s order by name"""
+	else:
+		if frappe.db.exists("Service Profile Appointment Type", {"parent": parent}):
+			query = """select appointment_type from `tabService Profile Appointment Type` where parent = '{parent}'
+			and appointment_type like %(txt)s order by name"""
+		else:
+			query = """select name from `tabAppointment Type` where appointment_type like %(txt)s order by name"""
+
+	return frappe.db.sql(query.format(**{
+		"parent": parent,
+		"mcond": get_match_cond(doctype)
+	}), {
+		'txt': "%%%s%%" % txt,
+		'_txt': txt.replace("%", ""),
+		'start': start,
+		'page_len': page_len
+	})

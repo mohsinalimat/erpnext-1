@@ -526,7 +526,14 @@ var check_and_set_availability = function(frm) {
 				{ fieldtype: 'Link', options: 'Medical Department', reqd:1, fieldname: 'department', label: 'Medical Department'},
 				{ fieldtype: 'Link', options: 'Healthcare Practitioner', reqd:1, fieldname: 'practitioner', label: 'Healthcare Practitioner'},
 				{ fieldtype: 'Column Break'},
-				{ fieldtype: 'Link', options: 'Appointment Type', reqd:1, fieldname: 'appointment_type', label: 'Appointment Type'},
+				{ fieldtype: 'Link', options: 'Appointment Type', reqd:1, fieldname: 'appointment_type', label: 'Appointment Type',
+				get_query:function () {
+					return {
+						query : "erpnext.healthcare.utils.get_practitioner_appointment_type",
+						filters: {parent : d.get_value("practitioner")}
+					}
+				},
+				},
 				{ fieldtype: 'Int', fieldname: 'duration', label: 'Duration', read_only:1},
 				{ fieldtype: 'Column Break'},
 				{ fieldtype: 'Date', reqd:1, fieldname: 'appointment_date', label: 'Date'},
