@@ -415,15 +415,6 @@ def set_if_multiple_insurance_assignments_prsent(include_in_insurance, doc_obj, 
 
 def service_item_and_practitioner_charge(doc):
 	is_ip = doc_is_ip(doc)
-	if is_ip:
-		service_item = get_practitioner_service_item(doc.practitioner, "inpatient_visit_charge_item")
-		if not service_item:
-			service_item = get_healthcare_service_item("inpatient_visit_charge_item")
-	else:
-		service_item = get_practitioner_service_item(doc.practitioner, "op_consulting_charge_item")
-		if not service_item:
-			service_item = get_healthcare_service_item("op_consulting_charge_item")
-
 	practitioner_event = False
 	appointment_type = False
 	if doc.doctype == "Patient Appointment":
@@ -432,6 +423,7 @@ def service_item_and_practitioner_charge(doc):
 	elif doc.doctype == "Patient Encounter" and doc.appointment:
 		practitioner_event, appointment_type = frappe.db.get_values("Patient Appointment", doc.appointment, ["practitioner_event", "appointment_type"])[0]
 	practitioner_charge = get_practitioner_charge(doc.practitioner, is_ip, practitioner_event, appointment_type)
+	service_item = get_service_item(doc.practitioner, is_ip, practitioner_event, appointment_type)
 
 	# service_item required if practitioner_charge is valid
 	if practitioner_charge and not service_item:
@@ -473,6 +465,22 @@ def get_practitioner_charge(practitioner, is_ip, practitioner_event=False, appoi
 		practitioner_charge = frappe.db.get_value("Healthcare Practitioner", practitioner, practitioner_charge_field)
 
 	return practitioner_charge if practitioner_charge else False
+
+def get_service_item(practitioner, is_ip, practitioner_event=False, appointment_type=False):
+	practitioner_item_field = "op_consulting_charge_item"
+	if is_ip:
+		practitioner_item_field = "inpatient_visit_charge_item"
+	service_item = False
+	if practitioner_event:
+		service_item = frappe.db.get_value("Practitioner Event", practitioner_event, practitioner_item_field)
+	if not service_item:
+		service_item = frappe.db.get_value("Appointment Type", appointment_type, practitioner_item_field)
+	if not service_item:
+		service_item = get_practitioner_service_item(practitioner, practitioner_item_field)
+	if not service_item:
+		service_item = get_healthcare_service_item(practitioner_item_field)
+
+	return service_item if service_item else False
 
 def manage_invoice_submit_cancel(doc, method):
 	if doc.items:
