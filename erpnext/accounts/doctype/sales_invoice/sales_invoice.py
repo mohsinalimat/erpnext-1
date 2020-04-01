@@ -164,7 +164,7 @@ class SalesInvoice(SellingController):
 			if self.items:
 				for item in self.items:
 					if item.reference_dt and item.reference_dn:
-						set_revenue_sharing_distribution(self, self.items)
+						set_revenue_sharing_distribution(self, item)
 
 	def on_submit(self):
 		self.validate_pos_paid_amount()
