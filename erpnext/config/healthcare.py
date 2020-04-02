@@ -141,8 +141,9 @@ def get_data():
 					"label": _("Healthcare Service Revenue Allocation"),
 				},
 				{
-					"type": "page",
-					"name": "appointment-analytic",
+					"type": "report",
+					"name": "Appointment Analytics",
+					"is_query_report": True,
 					"label": _("Appointment Analytics"),
 				},
 				{
