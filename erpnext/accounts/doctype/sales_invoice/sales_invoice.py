@@ -157,9 +157,14 @@ class SalesInvoice(SellingController):
 	def before_save(self):
 		set_account_for_mode_of_payment(self)
 		# Healthcare Service Invoice.
-		if self.items:
-			for item in self.items:
-				set_revenue_sharing_distribution(self, self.items)
+		domain_settings = frappe.get_doc('Domain Settings')
+		active_domains = [d.domain for d in domain_settings.active_domains]
+
+		if "Healthcare" in active_domains:
+			if self.items:
+				for item in self.items:
+					if item.reference_dt and item.reference_dn:
+						set_revenue_sharing_distribution(self, item)
 
 	def on_submit(self):
 		self.validate_pos_paid_amount()
