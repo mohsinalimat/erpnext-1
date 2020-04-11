@@ -1727,14 +1727,14 @@ def set_companion_details(contact, companion_details):
 
 def get_practitioner_appointment_type(doctype, txt, searchfield, start, page_len, filters):
 	parent = filters['parent']
-	if parent and frappe.db.get_value("Healthcare Practitioner", parent, "healthcare_practitioner_type") == "External":
-		query = """select name from `tabAppointment Type` where appointment_type like %(txt)s order by name"""
-	else:
+	if parent and frappe.db.get_value("Healthcare Practitioner", parent, "practitioner_service_profile"):
 		if frappe.db.exists("Service Profile Appointment Type", {"parent": parent}):
 			query = """select appointment_type from `tabService Profile Appointment Type` where parent = '{parent}'
 			and appointment_type like %(txt)s order by name"""
 		else:
 			query = """select name from `tabAppointment Type` where appointment_type like %(txt)s order by name"""
+	else:
+		query = """select name from `tabAppointment Type` where appointment_type like %(txt)s order by name"""
 
 	return frappe.db.sql(query.format(**{
 		"parent": parent,
