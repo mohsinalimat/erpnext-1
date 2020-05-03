@@ -561,6 +561,7 @@ def create_encounter(appointment):
 	encounter.practitioner = appointment.practitioner
 	encounter.visit_department = appointment.department
 	encounter.patient_sex = appointment.patient_sex
+	encounter.patient_age = get_age(appointment.patient)
 	encounter.encounter_date = appointment.appointment_date
 	encounter.service_unit = appointment.service_unit
 	if appointment.company:
@@ -578,6 +579,15 @@ def create_encounter(appointment):
 		encounter.insurance_remarks=appointment.insurance_remarks
 	return encounter.as_dict()
 
+def get_age(patient):
+	patient_doc = frappe.get_doc("Patient", patient)
+	age_str = ""
+	if patient_doc.dob:
+		born = getdate(patient_doc.dob)
+		from dateutil.relativedelta import relativedelta
+		age = relativedelta(getdate(), born)
+		age_str = str(age.years) + " year(s) " + str(age.months) + " month(s) " + str(age.days) + " day(s)"
+	return age_str
 
 def remind_appointment():
 	if frappe.db.get_value("Healthcare Settings", None, "app_rem") == '1':
