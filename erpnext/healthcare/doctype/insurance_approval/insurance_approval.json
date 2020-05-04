@@ -1,0 +1,175 @@
+{
+ "autoname": "naming_series:",
+ "creation": "2020-04-28 10:00:07.183192",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "patient",
+  "insurance_company",
+  "insurance_assignment",
+  "assignment_validity",
+  "reference_dt",
+  "reference_dn",
+  "coverage",
+  "column_break_8",
+  "mode_of_approval",
+  "approval_date",
+  "approval_reference",
+  "approved_by",
+  "approval_validity_end_date",
+  "section_break_13",
+  "items",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "insurance_company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Insurance Company",
+   "options": "Insurance Company",
+   "reqd": 1,
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "insurance_assignment",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Insurance Assignment",
+   "options": "Insurance Assignment",
+   "reqd": 1,
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Insurance Approval",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "assignment_validity",
+   "fieldtype": "Date",
+   "label": "Assignment Validity",
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "patient",
+   "fieldtype": "Link",
+   "label": "Patient",
+   "options": "Patient",
+   "reqd": 1,
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "mode_of_approval",
+   "fieldtype": "Select",
+   "label": "Mode of Approval",
+   "options": "Electronic\nManual\nAutomatic"
+  },
+  {
+   "fieldname": "approval_date",
+   "fieldtype": "Date",
+   "label": "Approval Date"
+  },
+  {
+   "fieldname": "approval_reference",
+   "fieldtype": "Data",
+   "label": "Approval Reference"
+  },
+  {
+   "fieldname": "approved_by",
+   "fieldtype": "Link",
+   "label": "Approved By",
+   "options": "User"
+  },
+  {
+   "fieldname": "approval_validity_end_date",
+   "fieldtype": "Date",
+   "label": "Approval Validity End Date"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Series",
+   "options": "HIA-",
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "section_break_13",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "options": "Insurance Approval Item"
+  },
+  {
+   "fieldname": "column_break_8",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "coverage",
+   "fieldtype": "Percent",
+   "label": "Coverage",
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "reference_dt",
+   "fieldtype": "Link",
+   "label": "Reference DocType",
+   "options": "DocType",
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "reference_dn",
+   "fieldtype": "Dynamic Link",
+   "label": "Reference Name",
+   "options": "reference_dt",
+   "set_only_once": 1
+  }
+ ],
+ "is_submittable": 1,
+ "modified": "2020-05-01 11:23:10.787073",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Insurance Approval",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Healthcare Administrator",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

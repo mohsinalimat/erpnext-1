@@ -1,0 +1,51 @@
+{
+ "creation": "2020-04-28 11:10:18.523902",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "item",
+  "requested_quantity",
+  "approved_quantity",
+  "approval_status"
+ ],
+ "fields": [
+  {
+   "fieldname": "item",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item",
+   "options": "Item"
+  },
+  {
+   "fieldname": "requested_quantity",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Requested Quantity"
+  },
+  {
+   "fieldname": "approved_quantity",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Approved Quantity"
+  },
+  {
+   "fieldname": "approval_status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Approval Status",
+   "options": "Pending\nApproved\nRejected\nCancelled"
+  }
+ ],
+ "istable": 1,
+ "modified": "2020-04-29 11:48:46.438986",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Insurance Approval Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
