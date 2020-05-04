@@ -1727,21 +1727,25 @@ def set_companion_details(contact, companion_details):
 
 def get_practitioner_appointment_type(doctype, txt, searchfield, start, page_len, filters):
 	parent = filters['parent']
-	if parent and frappe.db.get_value("Healthcare Practitioner", parent, "practitioner_service_profile"):
-		if frappe.db.exists("Service Profile Appointment Type", {"parent": parent}):
-			query = """select appointment_type from `tabService Profile Appointment Type` where parent = '{parent}'
+	profile_assignment = ''
+	practitioner_service_profile = ''
+	if frappe.db.exists('Healthcare Service Profile Assignment', {'practitioner': parent, 'is_active':'1', 'practitioner_service_profile': ['!=', '']}):
+		profile_assignment, practitioner_service_profile = frappe.db.get_value('Healthcare Service Profile Assignment', filters={'practitioner': parent,
+		'is_active':'1', 'practitioner_service_profile': ['!=', '']}, fieldname=['name', 'practitioner_service_profile'])
+	if parent and profile_assignment:
+		if frappe.db.exists('Service Profile Appointment Type', {'parent': practitioner_service_profile}):
+			query = """select appointment_type from `tabService Profile Appointment Type` where parent = '{practitioner_service_profile}'
 			and appointment_type like %(txt)s order by name"""
 		else:
 			query = """select name from `tabAppointment Type` where appointment_type like %(txt)s order by name"""
 	else:
 		query = """select name from `tabAppointment Type` where appointment_type like %(txt)s order by name"""
-
 	return frappe.db.sql(query.format(**{
-		"parent": parent,
-		"mcond": get_match_cond(doctype)
+		'practitioner_service_profile': practitioner_service_profile,
+		'mcond': get_match_cond(doctype)
 	}), {
 		'txt': "%%%s%%" % txt,
-		'_txt': txt.replace("%", ""),
+		'_txt': txt.replace('%', ''),
 		'start': start,
 		'page_len': page_len
 	})

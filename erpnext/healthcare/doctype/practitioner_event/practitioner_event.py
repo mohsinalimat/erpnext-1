@@ -29,7 +29,7 @@ class PractitionerEvent(Document):
 				frappe.throw("Please select atleast one day")
 
 def validate_duration(doc):
-	if doc.duration <= 0:
+	if not doc.duration or doc.duration <= 0:
 		frappe.throw(_("Duration must be geater than zero"))
 	else:
 		# time diff in minutes = in seconds / 60
