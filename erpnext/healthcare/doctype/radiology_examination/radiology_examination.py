@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-from erpnext.healthcare.utils import manage_healthcare_doc_cancel
+from erpnext.healthcare.utils import manage_healthcare_doc_cancel, create_insurance_approval_doc
 from erpnext.healthcare.doctype.patient_appointment.patient_appointment import update_status
 from frappe.utils import cstr
 
@@ -25,7 +25,8 @@ class RadiologyExamination(Document):
 		insert_to_medical_record(self)
 		if self.appointment:
 			update_status(self.appointment, "Closed")
-
+		if self.insurance:
+			create_insurance_approval_doc(self)
 	def validate(self):
 		ref_company = False
 		if self.inpatient_record:

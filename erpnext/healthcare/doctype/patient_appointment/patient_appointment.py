@@ -13,7 +13,7 @@ from frappe.core.doctype.sms_settings.sms_settings import send_sms
 from erpnext.hr.doctype.employee.employee import is_holiday
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import set_revenue_sharing_distribution
 from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_receivable_account,get_income_account
-from erpnext.healthcare.utils import validity_exists, service_item_and_practitioner_charge, sales_item_details_for_healthcare_doc, get_insurance_details, create_companion_contact
+from erpnext.healthcare.utils import validity_exists, service_item_and_practitioner_charge, sales_item_details_for_healthcare_doc, get_insurance_details, create_companion_contact, create_insurance_approval_doc
 
 class PatientAppointment(Document):
 	def on_update(self):
@@ -29,7 +29,6 @@ class PatientAppointment(Document):
 			if companion:
 				frappe.db.set_value("Patient Appointment", self.name, "companion", companion.name)
 		self.reload()
-
 	def validate(self):
 		end_time = datetime.datetime.combine(getdate(self.appointment_date), get_time(self.appointment_time)) + datetime.timedelta(minutes=float(self.duration))
 		query = """
@@ -125,7 +124,9 @@ class PatientAppointment(Document):
 				invoice_appointment(self, False)
 		#Alert
 		confirm_sms(self)
-
+		if self.insurance:
+			if self.procedure_template or self.radiology_procedure:
+				create_insurance_approval_doc(self)
 @frappe.whitelist()
 def invoice_appointment(appointment_doc, is_pos):
 	if not appointment_doc.name:
