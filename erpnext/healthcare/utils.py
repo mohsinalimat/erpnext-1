@@ -1512,13 +1512,14 @@ def get_revenue_sharing_distribution(invoice_item):
 					}
 				)
 				if assignment:
-					assignment_doc=frappe.get_doc("Healthcare Service Profile Assignment", assignment)
-					if assignment_doc:
+					service_profile = frappe.db.get_value("Healthcare Service Profile Assignment", assignment, "practitioner_service_profile")
+					service_profile_doc=frappe.get_doc("Practitioner Service Profile", service_profile)
+					if service_profile_doc:
 						distribute_amount=0
 						item_amount = float(item.rate) * float(item.qty)
-						if assignment_doc.revenue_sharing_items:
+						if service_profile_doc.revenue_sharing_items:
 							item_group=frappe.db.get_value("Item", item.item_code, "item_group")
-							for sharing_item in assignment_doc.revenue_sharing_items:
+							for sharing_item in service_profile_doc.revenue_sharing_items:
 								if sharing_item.item_group==item_group:
 									if sharing_item.type_of_sharing=="Fixed":
 										distribute_amount=sharing_item.direct_amount
@@ -1542,13 +1543,15 @@ def get_revenue_sharing_distribution(invoice_item):
 					}
 				)
 				if assignment:
+					service_profile = frappe.db.get_value("Healthcare Service Profile Assignment", assignment, "practitioner_service_profile")
+					service_profile_doc=frappe.get_doc("Practitioner Service Profile", service_profile)
 					assignment_doc=frappe.get_doc("Healthcare Service Profile Assignment", assignment)
-					if assignment_doc:
+					if service_profile_doc:
 						distribute_amount=0
 						item_amount= item.rate * item.qty
-						if assignment_doc.revenue_sharing_items:
+						if service_profile_doc.revenue_sharing_items:
 							item_group=frappe.db.get_value("Item", item.item_code, "item_group")
-							for sharing_item in assignment_doc.revenue_sharing_items:
+							for sharing_item in service_profile_doc.revenue_sharing_items:
 								if sharing_item.item_group==item_group:
 									if sharing_item.type_of_sharing=="Fixed":
 										distribute_amount=sharing_item.referral_amount
@@ -1566,9 +1569,9 @@ def get_revenue_sharing_distribution(invoice_item):
 					if assignment_doc.allow_multiple:
 						distribute_amount=0
 						item_amount= item.rate * item.qty
-						if assignment_doc.revenue_sharing_items:
+						if service_profile_doc.revenue_sharing_items:
 							item_group=frappe.db.get_value("Item", item.item_code, "item_group")
-							for sharing_item in assignment_doc.revenue_sharing_items:
+							for sharing_item in service_profile_doc.revenue_sharing_items:
 								if sharing_item.item_group==item_group:
 									if sharing_item.type_of_sharing=="Fixed":
 										distribute_amount=direct_amount
@@ -1591,13 +1594,14 @@ def get_revenue_sharing_distribution(invoice_item):
 					}
 				)
 				if assignment:
-					assignment_doc=frappe.get_doc("Healthcare Service Profile Assignment", assignment)
-					if assignment_doc:
+					service_profile = frappe.db.get_value("Healthcare Service Profile Assignment", assignment, "practitioner_service_profile")
+					service_profile_doc=frappe.get_doc("Practitioner Service Profile", service_profile)
+					if service_profile_doc:
 						distribute_amount=0
 						item_amount= item.rate * item.qty
-						if assignment_doc.revenue_sharing_items:
+						if service_profile_doc.revenue_sharing_items:
 							item_group=frappe.db.get_value("Item", item.item_code, "item_group")
-							for sharing_item in assignment_doc.revenue_sharing_items:
+							for sharing_item in service_profile_doc.revenue_sharing_items:
 								if sharing_item.item_group==item_group:
 									if sharing_item.type_of_sharing=="Fixed":
 										distribute_amount=referral_amount
