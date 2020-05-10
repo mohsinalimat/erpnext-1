@@ -46,7 +46,7 @@ def get_healthcare_services_to_invoice(patient, posting_date, validate_insurance
 									insurance_details = get_insurance_details(patient_appointment_obj.insurance, app_service_item, patient, valid_date)
 							if include_in_insurance and insurance_details:
 								invoice_item = {'reference_dt': 'Patient Appointment', 'reference_dn': patient_appointment_obj.name,
-									'item_code': app_service_item, 'cost_center': cost_center if cost_center else '', 'item_name':service_item_name,
+									'item_code': app_service_item, 'qty': approved_qty, 'cost_center': cost_center if cost_center else '', 'item_name':service_item_name,
 									'discount_percentage': insurance_details.discount, 'insurance_claim_coverage': insurance_details.coverage, 'insurance_approval_number': patient_appointment_obj.insurance_approval_number if patient_appointment_obj.insurance_approval_number else ''}
 								if insurance_details.rate:
 									invoice_item['rate'] = insurance_details.rate,
@@ -69,7 +69,7 @@ def get_healthcare_services_to_invoice(patient, posting_date, validate_insurance
 									insurance_details = get_insurance_details(patient_appointment_obj.insurance, app_radiology_service_item, patient, valid_date)
 							if include_in_insurance and insurance_details:
 								invoice_item={'reference_dt': 'Patient Appointment', 'reference_dn': patient_appointment_obj.name,
-									'item_code': app_radiology_service_item, 'cost_center': cost_center if cost_center else '', 'item_name':service_item_name,
+									'item_code': app_radiology_service_item, 'qty': approved_qty, 'cost_center': cost_center if cost_center else '', 'item_name':service_item_name,
 									'discount_percentage': insurance_details.discount, 'insurance_claim_coverage': insurance_details.coverage, 'insurance_approval_number': patient_appointment_obj.insurance_approval_number if patient_appointment_obj.insurance_approval_number else ''}
 								if insurance_details.rate:
 									invoice_item['rate'] = insurance_details.rate
@@ -158,7 +158,7 @@ def get_healthcare_services_to_invoice(patient, posting_date, validate_insurance
 								practitioner_charge = insurance_details.rate
 							if encounter_obj.insurance == insurance:
 								item_to_invoice.append({'reference_dt': 'Patient Encounter', 'reference_dn': encounter_obj.name, 'item_name':service_item_name,
-								'item_code': service_item, 'rate': practitioner_charge, 'cost_center': cost_center if cost_center else '', 'discount_percentage': insurance_details.discount,
+								'item_code': service_item, 'qty': approved_qty, 'rate': practitioner_charge, 'cost_center': cost_center if cost_center else '', 'discount_percentage': insurance_details.discount,
 								'income_account': income_account, 'insurance_claim_coverage': insurance_details.coverage, 'insurance_approval_number': encounter_obj.insurance_approval_number if encounter_obj.insurance_approval_number else ''})
 								multiple_assignments_prsent, prev_assignment = set_if_multiple_insurance_assignments_prsent(include_in_insurance, encounter_obj, prev_assignment, multiple_assignments_prsent)
 						else:
@@ -249,7 +249,7 @@ def get_healthcare_services_to_invoice(patient, posting_date, validate_insurance
 								insurance_details = get_insurance_details(procedure_obj.insurance, procedure_service_item, patient, valid_date)
 						if include_in_insurance and insurance_details:
 							invoice_item={'reference_dt': 'Clinical Procedure', 'reference_dn': procedure_obj.name, 'item_name':service_item_name,
-							'item_code': procedure_service_item, 'cost_center': cost_center if cost_center else '',
+							'item_code': procedure_service_item, 'qty': approved_qty, 'cost_center': cost_center if cost_center else '',
 							'discount_percentage': insurance_details.discount, 'insurance_claim_coverage': insurance_details.coverage, 'insurance_approval_number': procedure_obj.insurance_approval_number if procedure_obj.insurance_approval_number else ''}
 							if insurance_details.rate:
 								invoice_item['rate'] = insurance_details.rate-reduce_from_procedure_rate
@@ -285,7 +285,7 @@ def get_healthcare_services_to_invoice(patient, posting_date, validate_insurance
 								insurance_details = get_insurance_details(encx_obj.insurance, frappe.db.get_value("Clinical Procedure Template", rx_obj.procedure, "item"), patient, valid_date)
 						if include_in_insurance and insurance_details:
 							invoice_item={'reference_dt': 'Procedure Prescription', 'reference_dn': rx_obj.name, 'item_name':service_item_name,
-							 'item_code': frappe.db.get_value("Clinical Procedure Template", rx_obj.procedure, "item"), 'cost_center': cost_center if cost_center else '',
+							 'item_code': frappe.db.get_value("Clinical Procedure Template", rx_obj.procedure, "item"), 'qty': approved_qty, 'cost_center': cost_center if cost_center else '',
 							 'discount_percentage': insurance_details.discount, 'insurance_claim_coverage': insurance_details.coverage, 'insurance_approval_number': encx_obj.insurance_approval_number if encx_obj.insurance_approval_number else ''}
 							if insurance_details.rate:
 								invoice_item['rate'] = insurance_details.rate
@@ -316,7 +316,7 @@ def get_healthcare_services_to_invoice(patient, posting_date, validate_insurance
 									insurance_details = get_insurance_details(procedure_obj.insurance, procedure_service_item, patient, valid_date)
 							if include_in_insurance and insurance_details:
 								invoice_item={'reference_dt': 'Radiology Examination', 'reference_dn': procedure_obj.name, 'item_name':service_item_name,
-								'cost_center': cost_center if cost_center else '', 'item_code': procedure_service_item,
+								'cost_center': cost_center if cost_center else '', 'item_code': procedure_service_item, 'qty': approved_qty,
 								'discount_percentage': insurance_details.discount, 'insurance_claim_coverage': insurance_details.coverage, 'insurance_approval_number': procedure_obj.insurance_approval_number if procedure_obj.insurance_approval_number else ''}
 								if insurance_details.rate:
 									invoice_item['rate'] = insurance_details.rate
@@ -866,7 +866,7 @@ def get_drugs_to_invoice(encounter, posting_date, validate_insurance_on_invoice)
 								insurance_details = get_insurance_details(encounter.insurance, drug_line.drug_code, patient, valid_date)
 						if insurance_details:
 							invoice_item={'reference_dt': 'Drug Prescription', 'reference_dn': drug_line.name, 'item_name':item_name,
-								'item_code': drug_line.drug_code, 'qty': qty, 'description': description,
+								'item_code': drug_line.drug_code, 'qty': approved_qty, 'description': description,
 								'discount_percentage': insurance_details.discount, 'insurance_claim_coverage': insurance_details.coverage, 'insurance_approval_number': encounter.insurance_approval_number if encounter.insurance_approval_number else ''}
 							if insurance_details.rate:
 								invoice_item['rate'] = insurance_details.rate,
@@ -1768,10 +1768,10 @@ def get_practitioner_appointment_type(doctype, txt, searchfield, start, page_len
 def create_insurance_approval_doc(doc):
 	insurance_assignment = frappe.get_doc("Insurance Assignment", doc.insurance)
 	items = []
-	qty = 1
 	if doc.doctype == "Patient Encounter":
 		encounter_item = service_item_and_practitioner_charge(doc)[0]
 		if encounter_item:
+			qty = 1
 			is_valid = check_insurance_validity_on_item(doc.insurance, encounter_item,  doc.encounter_date)
 			if is_valid:
 				items.append({
@@ -1787,17 +1787,18 @@ def create_insurance_approval_doc(doc):
 						'item' : drug.drug_code,
 						'requested_quantity' : qty
 					})
-		# if doc.lab_test_prescription:
-		# 	for lab in doc.lab_test_prescription:
-		# 		if lab.lab_test_code and (frappe.db.get_value("Lab Test Template", lab.lab_test_code, "is_billable") == 1):
-		# 			lab_item_code = frappe.db.get_value("Lab Test Template", lab.lab_test_code, "item")
-		# 			if lab_item_code:
-		# 				is_valid = check_insurance_validity_on_item(doc.insurance, lab_item_code,  doc.encounter_date)
-		# 				if is_valid:
-		# 					items.append({
-		# 						'item' : lab_item_code,
-		# 						'requested_quantity' : qty
-		# 					})
+		if doc.lab_test_prescription:
+			for lab in doc.lab_test_prescription:
+				if lab.lab_test_code and (frappe.db.get_value("Lab Test Template", lab.lab_test_code, "is_billable") == 1):
+					lab_item_code = frappe.db.get_value("Lab Test Template", lab.lab_test_code, "item")
+					if lab_item_code:
+						is_valid = check_insurance_validity_on_item(doc.insurance, lab_item_code,  doc.encounter_date)
+						if is_valid:
+							qty = 1
+							items.append({
+								'item' : lab_item_code,
+								'requested_quantity' : qty
+							})
 		if doc.procedure_prescription:
 			for procedure in doc.procedure_prescription:
 				if frappe.db.get_value("Clinical Procedure Template", procedure.procedure, "is_billable") == 1:
@@ -1805,6 +1806,7 @@ def create_insurance_approval_doc(doc):
 					if procedure_item_code:
 						is_valid = check_insurance_validity_on_item(doc.insurance, procedure_item_code,  doc.encounter_date)
 						if is_valid:
+							qty = 1
 							items.append({
 								'item' : procedure_item_code,
 								'requested_quantity' : qty
@@ -1816,6 +1818,7 @@ def create_insurance_approval_doc(doc):
 					if radiology_item_code:
 						is_valid = check_insurance_validity_on_item(doc.insurance, radiology_item_code,  doc.encounter_date)
 						if is_valid:
+							qty = 1
 							items.append({
 								'item' : radiology_item_code,
 								'requested_quantity' : qty
@@ -1827,6 +1830,7 @@ def create_insurance_approval_doc(doc):
 				if procedure_item_code:
 					is_valid = check_insurance_validity_on_item(doc.insurance, procedure_item_code,  doc.appointment_date)
 					if is_valid:
+						qty = 1
 						items.append({
 							'item' : procedure_item_code,
 							'requested_quantity' : qty
@@ -1837,26 +1841,29 @@ def create_insurance_approval_doc(doc):
 				if radiology_item_code:
 					is_valid = check_insurance_validity_on_item(doc.insurance, radiology_item_code,  doc.appointment_date)
 					if is_valid:
+						qty = 1
 						items.append({
 							'item' : radiology_item_code,
 							'requested_quantity' : qty
 						})
-	# if doc.doctype == "Lab Test":
-	# 	if frappe.db.get_value("Lab Test Template", doc.template, "is_billable") == 1:
-	# 		lab_item_code = frappe.db.get_value("Lab Test Template", lab.lab_test_code, "item")
-	# 		if lab_item_code:
-	# 			is_valid = check_insurance_validity_on_item(doc.insurance, lab_item_code,  doc.submitted_date)
-	# 			if is_valid:
-	# 				items.append({
-	# 					'item' : lab_item_code,
-	# 					'requested_quantity' : qty
-	# 				})
+	if doc.doctype == "Lab Test":
+		if frappe.db.get_value("Lab Test Template", doc.template, "is_billable") == 1:
+			lab_item_code = frappe.db.get_value("Lab Test Template", lab.lab_test_code, "item")
+			if lab_item_code:
+				is_valid = check_insurance_validity_on_item(doc.insurance, lab_item_code,  doc.submitted_date)
+				if is_valid:
+					qty = 1
+					items.append({
+						'item' : lab_item_code,
+						'requested_quantity' : qty
+					})
 	if doc.doctype == "Clinical Procedure":
 		if frappe.db.get_value("Clinical Procedure Template", doc.procedure_template, "is_billable") == 1:
 			procedure_item_code = frappe.db.get_value("Clinical Procedure Template", doc.procedure_template, "item")
 			if procedure_item_code:
 				is_valid = check_insurance_validity_on_item(doc.insurance, procedure_item_code,  doc.start_date)
 				if is_valid:
+					qty = 1
 					items.append({
 						'item' : procedure_item_code,
 						'requested_quantity' : qty
@@ -1867,6 +1874,7 @@ def create_insurance_approval_doc(doc):
 			if radiology_item_code:
 				is_valid = check_insurance_validity_on_item(doc.insurance, radiology_item_code,  doc.start_date)
 				if is_valid:
+					qty = 1
 					items.append({
 						'item' : radiology_item_code,
 						'requested_quantity' : qty
