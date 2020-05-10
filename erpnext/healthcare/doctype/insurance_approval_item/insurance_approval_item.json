@@ -7,7 +7,8 @@
   "item",
   "requested_quantity",
   "approved_quantity",
-  "approval_status"
+  "approval_status",
+  "billed_quantity"
  ],
  "fields": [
   {
@@ -35,10 +36,17 @@
    "in_list_view": 1,
    "label": "Approval Status",
    "options": "Pending\nApproved\nRejected\nCancelled"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "billed_quantity",
+   "fieldtype": "Data",
+   "label": "Billed Quantity",
+   "read_only": 1
   }
  ],
  "istable": 1,
- "modified": "2020-04-29 11:48:46.438986",
+ "modified": "2020-05-10 11:16:08.906149",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Insurance Approval Item",
