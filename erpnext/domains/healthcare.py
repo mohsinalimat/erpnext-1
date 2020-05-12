@@ -105,7 +105,11 @@ data = {
 			{
 				'fieldname': 'insurance_item', 'label': 'Insurance Item', 'fieldtype': 'Check',
 				'insert_after': 'insurance_approval_number', 'read_only':True
-			}
+			},
+			{
+				'fieldname': 'insurance_approval', 'label': 'Insurance Approval', 'fieldtype': 'Link',
+				'read_only': True, 'insert_after': 'insurance_item', 'options': 'Insurance Approval'
+			},
 		],
 		'Delivery Note': [
 			{
@@ -145,7 +149,6 @@ data = {
 				'fieldname': 'insurance_remarks', 'label': 'Insurance Remarks', 'fieldtype': 'Small Text',
 				'insert_after': 'return_against', 'depends_on': 'insurance'
 			}
-
 		],
 		'Delivery Note Item': [
 			{
