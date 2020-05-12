@@ -41,13 +41,14 @@ def get_healthcare_services_to_invoice(patient, posting_date, validate_insurance
 							insurance_details = False
 							if include_in_insurance and patient_appointment_obj.insurance:
 								valid_date = patient_appointment_obj.appointment_date if validate_insurance_on_invoice=="1" else posting_date
-								approved_qty = check_insurance_approval_on_item(patient_appointment_obj.name, app_service_item)
+								approved_qty, insurance_approval = check_insurance_approval_on_item(patient_appointment_obj.name, app_service_item, posting_date)
 								if approved_qty:
 									insurance_details = get_insurance_details(patient_appointment_obj.insurance, app_service_item, patient, valid_date)
 							if include_in_insurance and insurance_details:
 								invoice_item = {'reference_dt': 'Patient Appointment', 'reference_dn': patient_appointment_obj.name,
 									'item_code': app_service_item, 'qty': approved_qty, 'cost_center': cost_center if cost_center else '', 'item_name':service_item_name,
-									'discount_percentage': insurance_details.discount, 'insurance_claim_coverage': insurance_details.coverage, 'insurance_approval_number': patient_appointment_obj.insurance_approval_number if patient_appointment_obj.insurance_approval_number else ''}
+									'discount_percentage': insurance_details.discount, 'insurance_claim_coverage': insurance_details.coverage, 'insurance_approval_number': patient_appointment_obj.insurance_approval_number if patient_appointment_obj.insurance_approval_number else '',
+									'insurance_approval' : insurance_approval}
 								if insurance_details.rate:
 									invoice_item['rate'] = insurance_details.rate,
 								if patient_appointment_obj.insurance == insurance:
@@ -64,13 +65,14 @@ def get_healthcare_services_to_invoice(patient, posting_date, validate_insurance
 							insurance_details = False
 							if include_in_insurance and patient_appointment_obj.insurance:
 								valid_date = patient_appointment_obj.appointment_date if validate_insurance_on_invoice=="1" else posting_date
-								approved_qty = check_insurance_approval_on_item(patient_appointment_obj.name, app_radiology_service_item)
+								approved_qty, insurance_approval = check_insurance_approval_on_item(patient_appointment_obj.name, app_radiology_service_item, posting_date)
 								if approved_qty:
 									insurance_details = get_insurance_details(patient_appointment_obj.insurance, app_radiology_service_item, patient, valid_date)
 							if include_in_insurance and insurance_details:
 								invoice_item={'reference_dt': 'Patient Appointment', 'reference_dn': patient_appointment_obj.name,
 									'item_code': app_radiology_service_item, 'qty': approved_qty, 'cost_center': cost_center if cost_center else '', 'item_name':service_item_name,
-									'discount_percentage': insurance_details.discount, 'insurance_claim_coverage': insurance_details.coverage, 'insurance_approval_number': patient_appointment_obj.insurance_approval_number if patient_appointment_obj.insurance_approval_number else ''}
+									'discount_percentage': insurance_details.discount, 'insurance_claim_coverage': insurance_details.coverage, 'insurance_approval_number': patient_appointment_obj.insurance_approval_number if patient_appointment_obj.insurance_approval_number else '',
+									'insurance_approval' : insurance_approval}
 								if insurance_details.rate:
 									invoice_item['rate'] = insurance_details.rate
 								if patient_appointment_obj.insurance == insurance:
@@ -150,7 +152,7 @@ def get_healthcare_services_to_invoice(patient, posting_date, validate_insurance
 						insurance_details = False
 						if include_in_insurance and encounter_obj.insurance:
 							valid_date = encounter_obj.encounter_date if validate_insurance_on_invoice=="1" else posting_date
-							approved_qty = check_insurance_approval_on_item(encounter_obj.name, service_item)
+							approved_qty, insurance_approval = check_insurance_approval_on_item(encounter_obj.name, service_item, posting_date)
 							if approved_qty:
 								insurance_details = get_insurance_details(encounter_obj.insurance, service_item, patient, valid_date)
 						if include_in_insurance and insurance_details:
@@ -158,7 +160,7 @@ def get_healthcare_services_to_invoice(patient, posting_date, validate_insurance
 								practitioner_charge = insurance_details.rate
 							if encounter_obj.insurance == insurance:
 								item_to_invoice.append({'reference_dt': 'Patient Encounter', 'reference_dn': encounter_obj.name, 'item_name':service_item_name,
-								'item_code': service_item, 'qty': approved_qty, 'rate': practitioner_charge, 'cost_center': cost_center if cost_center else '', 'discount_percentage': insurance_details.discount,
+								'item_code': service_item, 'qty': approved_qty, 'rate': practitioner_charge, 'cost_center': cost_center if cost_center else '', 'discount_percentage': insurance_details.discount, 'insurance_approval' : insurance_approval,
 								'income_account': income_account, 'insurance_claim_coverage': insurance_details.coverage, 'insurance_approval_number': encounter_obj.insurance_approval_number if encounter_obj.insurance_approval_number else ''})
 								multiple_assignments_prsent, prev_assignment = set_if_multiple_insurance_assignments_prsent(include_in_insurance, encounter_obj, prev_assignment, multiple_assignments_prsent)
 						else:
@@ -178,10 +180,12 @@ def get_healthcare_services_to_invoice(patient, posting_date, validate_insurance
 						insurance_details = False
 						if include_in_insurance and lab_test_obj.insurance:
 							valid_date = lab_test_obj.submitted_date if validate_insurance_on_invoice=="1" else posting_date
-							insurance_details = get_insurance_details(lab_test_obj.insurance, frappe.db.get_value("Lab Test Template", lab_test_obj.template, "item"), patient, valid_date)
+							approved_qty, insurance_approval = check_insurance_approval_on_item(lab_test_obj.name, frappe.db.get_value("Lab Test Template", lab_test_obj.template, "item"), posting_date)
+							if approved_qty:
+								insurance_details = get_insurance_details(lab_test_obj.insurance, frappe.db.get_value("Lab Test Template", lab_test_obj.template, "item"), patient, valid_date)
 						if include_in_insurance and insurance_details:
 							invoice_item={'reference_dt': 'Lab Test', 'reference_dn': lab_test_obj.name, 'item_name':service_item_name,
-							'item_code': frappe.db.get_value("Lab Test Template", lab_test_obj.template, "item"), 'cost_center': cost_center if cost_center else '',
+							'item_code': frappe.db.get_value("Lab Test Template", lab_test_obj.template, "item"), 'cost_center': cost_center if cost_center else '', 'insurance_approval' : insurance_approval,
 							'discount_percentage': insurance_details.discount, 'insurance_claim_coverage': insurance_details.coverage, 'insurance_approval_number': lab_test_obj.insurance_approval_number if lab_test_obj.insurance_approval_number else ''}
 							if insurance_details.rate:
 								invoice_item['rate'] = insurance_details.rate,
@@ -209,10 +213,12 @@ def get_healthcare_services_to_invoice(patient, posting_date, validate_insurance
 						insurance_details = False
 						if include_in_insurance and encx_obj.insurance:
 							valid_date = encx_obj.encounter_date if validate_insurance_on_invoice=="1" else posting_date
-							insurance_details = get_insurance_details(encx_obj.insurance, frappe.db.get_value("Lab Test Template", rx_obj.lab_test_code, "item"), patient,  valid_date)
+							approved_qty, insurance_approval = check_insurance_approval_on_item(encx_obj.name, frappe.db.get_value("Lab Test Template", rx_obj.lab_test_code, "item"), posting_date)
+							if approved_qty:
+								insurance_details = get_insurance_details(encx_obj.insurance, frappe.db.get_value("Lab Test Template", rx_obj.lab_test_code, "item"), patient,  valid_date)
 						if include_in_insurance and insurance_details:
 							invoice_item={'reference_dt': 'Lab Prescription', 'reference_dn': rx_obj.name,
-							'item_code': frappe.db.get_value("Lab Test Template", rx_obj.lab_test_code, "item"), 'cost_center': cost_center if cost_center else '', 'item_name':service_item_name,
+							'item_code': frappe.db.get_value("Lab Test Template", rx_obj.lab_test_code, "item"), 'cost_center': cost_center if cost_center else '', 'item_name':service_item_name, 'insurance_approval' : insurance_approval,
 							'discount_percentage': insurance_details.discount, 'insurance_claim_coverage': insurance_details.coverage, 'insurance_approval_number': encx_obj.insurance_approval_number if encx_obj.insurance_approval_number else ''}
 							if insurance_details.rate:
 								invoice_item['rate'] = insurance_details.rate
@@ -244,12 +250,12 @@ def get_healthcare_services_to_invoice(patient, posting_date, validate_insurance
 						insurance_details = False
 						if include_in_insurance and procedure_obj.insurance:
 							valid_date = procedure_obj.start_date if validate_insurance_on_invoice=="1" else posting_date
-							approved_qty = check_insurance_approval_on_item(procedure_obj.name, procedure_service_item)
+							approved_qty, insurance_approval = check_insurance_approval_on_item(procedure_obj.name, procedure_service_item, posting_date)
 							if approved_qty:
 								insurance_details = get_insurance_details(procedure_obj.insurance, procedure_service_item, patient, valid_date)
 						if include_in_insurance and insurance_details:
 							invoice_item={'reference_dt': 'Clinical Procedure', 'reference_dn': procedure_obj.name, 'item_name':service_item_name,
-							'item_code': procedure_service_item, 'qty': approved_qty, 'cost_center': cost_center if cost_center else '',
+							'item_code': procedure_service_item, 'qty': approved_qty, 'cost_center': cost_center if cost_center else '', 'insurance_approval' : insurance_approval,
 							'discount_percentage': insurance_details.discount, 'insurance_claim_coverage': insurance_details.coverage, 'insurance_approval_number': procedure_obj.insurance_approval_number if procedure_obj.insurance_approval_number else ''}
 							if insurance_details.rate:
 								invoice_item['rate'] = insurance_details.rate-reduce_from_procedure_rate
@@ -280,12 +286,12 @@ def get_healthcare_services_to_invoice(patient, posting_date, validate_insurance
 						insurance_details = False
 						if include_in_insurance and encx_obj.insurance:
 							valid_date = encx_obj.encounter_date if validate_insurance_on_invoice=="1" else posting_date
-							approved_qty = check_insurance_approval_on_item(encx_obj.name, frappe.db.get_value("Clinical Procedure Template", rx_obj.procedure, "item"))
+							approved_qty, insurance_approval = check_insurance_approval_on_item(encx_obj.name, frappe.db.get_value("Clinical Procedure Template", rx_obj.procedure, "item"), posting_date)
 							if approved_qty:
 								insurance_details = get_insurance_details(encx_obj.insurance, frappe.db.get_value("Clinical Procedure Template", rx_obj.procedure, "item"), patient, valid_date)
 						if include_in_insurance and insurance_details:
 							invoice_item={'reference_dt': 'Procedure Prescription', 'reference_dn': rx_obj.name, 'item_name':service_item_name,
-							 'item_code': frappe.db.get_value("Clinical Procedure Template", rx_obj.procedure, "item"), 'qty': approved_qty, 'cost_center': cost_center if cost_center else '',
+							 'item_code': frappe.db.get_value("Clinical Procedure Template", rx_obj.procedure, "item"), 'qty': approved_qty, 'cost_center': cost_center if cost_center else '', 'insurance_approval' : insurance_approval,
 							 'discount_percentage': insurance_details.discount, 'insurance_claim_coverage': insurance_details.coverage, 'insurance_approval_number': encx_obj.insurance_approval_number if encx_obj.insurance_approval_number else ''}
 							if insurance_details.rate:
 								invoice_item['rate'] = insurance_details.rate
@@ -311,12 +317,12 @@ def get_healthcare_services_to_invoice(patient, posting_date, validate_insurance
 							insurance_details = False
 							if include_in_insurance and procedure_obj.insurance:
 								valid_date = procedure_obj.start_date if validate_insurance_on_invoice=="1" else posting_date
-								approved_qty = check_insurance_approval_on_item(procedure_obj.name, procedure_service_item)
+								approved_qty, insurance_approval = check_insurance_approval_on_item(procedure_obj.name, procedure_service_item, posting_date)
 								if approved_qty:
 									insurance_details = get_insurance_details(procedure_obj.insurance, procedure_service_item, patient, valid_date)
 							if include_in_insurance and insurance_details:
 								invoice_item={'reference_dt': 'Radiology Examination', 'reference_dn': procedure_obj.name, 'item_name':service_item_name,
-								'cost_center': cost_center if cost_center else '', 'item_code': procedure_service_item, 'qty': approved_qty,
+								'cost_center': cost_center if cost_center else '', 'item_code': procedure_service_item, 'qty': approved_qty, 'insurance_approval' : insurance_approval,
 								'discount_percentage': insurance_details.discount, 'insurance_claim_coverage': insurance_details.coverage, 'insurance_approval_number': procedure_obj.insurance_approval_number if procedure_obj.insurance_approval_number else ''}
 								if insurance_details.rate:
 									invoice_item['rate'] = insurance_details.rate
@@ -513,6 +519,17 @@ def manage_invoice_submit_cancel(doc, method):
 					jv_amount[doc.insurance] += item.amount
 				else:
 					jv_amount[doc.insurance] = item.amount
+			if item.insurance_approval:
+				insurance_approval = frappe.get_doc("Insurance Approval", item.insurance_approval)
+				if insurance_approval:
+					for insurance_approval_item in insurance_approval.items:
+						if insurance_approval_item:
+							if insurance_approval_item.item == item.item_code:
+								if method == "on_submit":
+									insurance_approval_item.billed_quantity += item.qty
+								elif method == "on_cancel" and insurance_approval_item.billed_quantity > 0:
+									insurance_approval_item.billed_quantity -= item.qty
+					insurance_approval.save()
 		if jv_amount and method == "on_submit":
 			for key in jv_amount:
 				create_insurance_claim(frappe.get_doc("Insurance Assignment", key), jv_amount[key], doc)
@@ -861,12 +878,12 @@ def get_drugs_to_invoice(encounter, posting_date, validate_insurance_on_invoice)
 						insurance_details = False
 						if encounter.insurance:
 							valid_date = encounter.encounter_date if validate_insurance_on_invoice=="1" else posting_date
-							approved_qty = check_insurance_approval_on_item(encounter.name, drug_line.drug_code)
+							approved_qty, insurance_approval = check_insurance_approval_on_item(encounter.name, drug_line.drug_code, posting_date)
 							if approved_qty:
 								insurance_details = get_insurance_details(encounter.insurance, drug_line.drug_code, patient, valid_date)
 						if insurance_details:
 							invoice_item={'reference_dt': 'Drug Prescription', 'reference_dn': drug_line.name, 'item_name':item_name,
-								'item_code': drug_line.drug_code, 'qty': approved_qty, 'description': description,
+								'item_code': drug_line.drug_code, 'qty': approved_qty, 'description': description, 'insurance_approval' : insurance_approval,
 								'discount_percentage': insurance_details.discount, 'insurance_claim_coverage': insurance_details.coverage, 'insurance_approval_number': encounter.insurance_approval_number if encounter.insurance_approval_number else ''}
 							if insurance_details.rate:
 								invoice_item['rate'] = insurance_details.rate,
@@ -1913,16 +1930,18 @@ def check_insurance_validity_on_item(insurance, service_item, valid_date):
 			is_valid=True
 	return is_valid
 
-def check_insurance_approval_on_item(doc_name, service_item):
+def check_insurance_approval_on_item(doc_name, service_item, posting_date):
 	approved_qty = 0
+	insurance_approval = False
 	if doc_name:
-		if frappe.db.exists("Insurance Approval", {"reference_dn": doc_name, "docstatus" : 1}):
-			approval =  frappe.get_doc("Insurance Approval", {"reference_dn": doc_name, "docstatus" : 1})
+		if frappe.db.exists("Insurance Approval", {"reference_dn": doc_name, "docstatus" : 1, 'approval_validity_end_date':("<=", getdate(posting_date))}):
+			approval =  frappe.get_doc("Insurance Approval", {"reference_dn": doc_name, "docstatus" : 1, })
 			if approval:
 				if approval.items:
 					for item in approval.items:
 						if item.item == service_item and item.approval_status == "Approved" :
-							approved_qty = item.approved_quantity
-	return approved_qty
+							approved_qty = item.approved_quantity - item.billed_quantity
+							insurance_approval = approval.name
+	return approved_qty, insurance_approval
 
 

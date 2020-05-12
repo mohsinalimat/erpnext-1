@@ -20,13 +20,13 @@
   },
   {
    "fieldname": "requested_quantity",
-   "fieldtype": "Data",
+   "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Requested Quantity"
   },
   {
    "fieldname": "approved_quantity",
-   "fieldtype": "Data",
+   "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Approved Quantity"
   },
@@ -40,13 +40,13 @@
   {
    "allow_on_submit": 1,
    "fieldname": "billed_quantity",
-   "fieldtype": "Data",
+   "fieldtype": "Float",
    "label": "Billed Quantity",
    "read_only": 1
   }
  ],
  "istable": 1,
- "modified": "2020-05-10 11:16:08.906149",
+ "modified": "2020-05-11 15:45:18.912406",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Insurance Approval Item",
