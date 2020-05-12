@@ -16,6 +16,8 @@ class LabTest(Document):
 		frappe.db.set_value("Lab Test", self.name, "status", "Completed")
 		if self.inpatient_record and frappe.db.get_value("Healthcare Settings", None, "auto_invoice_inpatient") == '1':
 			self.invoice()
+		if self.insurance:
+			create_insurance_approval_doc(self)
 
 	def invoice(self):
 		if not self.invoiced:
