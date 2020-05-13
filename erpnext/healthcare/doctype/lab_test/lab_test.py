@@ -8,7 +8,6 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import getdate, cstr, now_datetime, today, month_diff, date_diff
 from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_receivable_account
-from erpnext.healthcare.utils import create_insurance_approval_doc
 
 class LabTest(Document):
 	def on_submit(self):
@@ -18,6 +17,7 @@ class LabTest(Document):
 		if self.inpatient_record and frappe.db.get_value("Healthcare Settings", None, "auto_invoice_inpatient") == '1':
 			self.invoice()
 		if self.insurance:
+			from erpnext.healthcare.utils import create_insurance_approval_doc
 			create_insurance_approval_doc(self)
 
 	def invoice(self):

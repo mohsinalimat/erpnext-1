@@ -1865,7 +1865,7 @@ def create_insurance_approval_doc(doc):
 						})
 	if doc.doctype == "Lab Test":
 		if frappe.db.get_value("Lab Test Template", doc.template, "is_billable") == 1:
-			lab_item_code = frappe.db.get_value("Lab Test Template", lab.lab_test_code, "item")
+			lab_item_code = frappe.db.get_value("Lab Test Template", doc.template, "item")
 			if lab_item_code:
 				is_valid = check_insurance_validity_on_item(doc.insurance, lab_item_code,  doc.submitted_date)
 				if is_valid:

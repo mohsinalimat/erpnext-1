@@ -12,7 +12,7 @@ from erpnext.healthcare.doctype.lab_test.lab_test import create_sample_doc, crea
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import set_revenue_sharing_distribution
 from erpnext.stock.stock_ledger import get_previous_sle
 import datetime
-from erpnext.healthcare.utils import sales_item_details_for_healthcare_doc, get_procedure_delivery_item, item_reduce_procedure_rate, manage_healthcare_doc_cancel, get_insurance_details, create_insurance_approval_doc
+from erpnext.healthcare.utils import sales_item_details_for_healthcare_doc, get_procedure_delivery_item, item_reduce_procedure_rate, manage_healthcare_doc_cancel, get_insurance_details
 from erpnext.healthcare.doctype.patient_appointment.patient_appointment import update_status
 
 class ClinicalProcedure(Document):
@@ -77,6 +77,7 @@ class ClinicalProcedure(Document):
 			self.invoice()
 		self.save()
 		if self.insurance:
+			from erpnext.healthcare.utils import create_insurance_approval_doc
 			create_insurance_approval_doc(self)
 
 	def invoice(self):
