@@ -1147,7 +1147,7 @@ var get_healthcare_items = function(frm, invoice_healthcare_services, $results, 
 				if(invoice_healthcare_services && disabled){
 					$results.append("<div align='center' style='color:red'>Services tagged with multiple Insurance Assignments, Can not be Invoiced togehter. You can select Insrance Assignment for apply filter</div>");
 				}
-				var items = invoice_healthcare_services ? data.message[0]: data.message
+				var items = data.message[0]
 				$results.append(make_list_row(columns, invoice_healthcare_services, {}, disabled));
 				for(let i=0; i<items.length; i++){
 					$results.append(make_list_row(columns, invoice_healthcare_services, items[i], disabled));
