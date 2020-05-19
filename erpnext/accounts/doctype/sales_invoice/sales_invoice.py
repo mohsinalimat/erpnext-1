@@ -142,6 +142,7 @@ class SalesInvoice(SellingController):
 
 		if "Healthcare" in active_domains:
 			self.calculate_healthcare_insurance_claim()
+			self.validate_insurance_approval_qty()
 
 	def validate_fixed_asset(self):
 		for d in self.get("items"):
@@ -1220,6 +1221,18 @@ class SalesInvoice(SellingController):
 		self.total_insurance_claim_amount = total_claim_amount
 		if self.total_insurance_claim_amount and self.outstanding_amount:
 			self.patient_payable_amount = self.outstanding_amount-self.total_insurance_claim_amount
+
+	def validate_insurance_approval_qty(self):
+		if self.items:
+			for item in self.items:
+				if item.insurance_approval:
+					insurance_approval = frappe.get_doc("Insurance Approval", item.insurance_approval)
+					if insurance_approval.items:
+						for approval_item in insurance_approval.items:
+							if item.item_code == approval_item.item:
+								if approval_item.approved_quantity < item.qty:
+									frappe.throw(_("Item Code: {0} quantity is greater than Insurance Approval : {1}  approved quantity".format(item.item_code, item.insurance_approval)))
+
 
 	def get_discounting_status(self):
 		status = None
