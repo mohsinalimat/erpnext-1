@@ -126,7 +126,9 @@ class PatientAppointment(Document):
 		confirm_sms(self)
 		if self.insurance:
 			if self.procedure_template or self.radiology_procedure:
-				create_insurance_approval_doc(self)
+				is_insurance_approval = frappe.get_value("Insurance Company", (frappe.get_value("Insurance Assignment", self.insurance, "insurance_company")), "is_insurance_approval")
+				if is_insurance_approval:
+					create_insurance_approval_doc(self)
 @frappe.whitelist()
 def invoice_appointment(appointment_doc, is_pos):
 	if not appointment_doc.name:

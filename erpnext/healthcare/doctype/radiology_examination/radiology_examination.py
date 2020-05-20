@@ -26,8 +26,10 @@ class RadiologyExamination(Document):
 		if self.appointment:
 			update_status(self.appointment, "Closed")
 		if self.insurance:
-			from erpnext.healthcare.utils import create_insurance_approval_doc
-			create_insurance_approval_doc(self)
+			is_insurance_approval = frappe.get_value("Insurance Company", (frappe.get_value("Insurance Assignment", self.insurance, "insurance_company")), "is_insurance_approval")
+			if is_insurance_approval:
+				from erpnext.healthcare.utils import create_insurance_approval_doc
+				create_insurance_approval_doc(self)
 	def validate(self):
 		ref_company = False
 		if self.inpatient_record:

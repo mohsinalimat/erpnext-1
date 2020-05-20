@@ -17,8 +17,10 @@ class LabTest(Document):
 		if self.inpatient_record and frappe.db.get_value("Healthcare Settings", None, "auto_invoice_inpatient") == '1':
 			self.invoice()
 		if self.insurance:
-			from erpnext.healthcare.utils import create_insurance_approval_doc
-			create_insurance_approval_doc(self)
+			is_insurance_approval = frappe.get_value("Insurance Company", (frappe.get_value("Insurance Assignment", self.insurance, "insurance_company")), "is_insurance_approval")
+			if is_insurance_approval:
+				from erpnext.healthcare.utils import create_insurance_approval_doc
+				create_insurance_approval_doc(self)
 
 	def invoice(self):
 		if not self.invoiced:

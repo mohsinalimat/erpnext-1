@@ -77,8 +77,10 @@ class ClinicalProcedure(Document):
 			self.invoice()
 		self.save()
 		if self.insurance:
-			from erpnext.healthcare.utils import create_insurance_approval_doc
-			create_insurance_approval_doc(self)
+			is_insurance_approval = frappe.get_value("Insurance Company", (frappe.get_value("Insurance Assignment", self.insurance, "insurance_company")), "is_insurance_approval")
+			if is_insurance_approval:
+				from erpnext.healthcare.utils import create_insurance_approval_doc
+				create_insurance_approval_doc(self)
 
 	def invoice(self):
 		if not self.invoiced and self.status == "Completed" and not self.appointment:

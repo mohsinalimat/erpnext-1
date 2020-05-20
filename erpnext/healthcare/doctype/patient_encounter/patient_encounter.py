@@ -44,7 +44,9 @@ class PatientEncounter(Document):
 		if self.appointment:
 			update_status(self.appointment, "Closed")
 		if self.insurance:
-			create_insurance_approval_doc(self)
+			is_insurance_approval = frappe.get_value("Insurance Company", (frappe.get_value("Insurance Assignment", self.insurance, "insurance_company")), "is_insurance_approval")
+			if is_insurance_approval:
+				create_insurance_approval_doc(self)
 
 	def before_cancel(self):
 		self.validate_orders()
