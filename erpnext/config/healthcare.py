@@ -160,6 +160,11 @@ def get_data():
 					"type": "doctype",
 					"name": "Insurance plan",
 					"label": _("Insurance plan"),
+				},
+				{
+					"type": "doctype",
+					"name": "Insurance Approval",
+					"label": _("Insurance Approval"),
 				}
 			]
 		},
