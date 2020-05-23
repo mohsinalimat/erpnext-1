@@ -6,12 +6,12 @@
  "engine": "InnoDB",
  "field_order": [
   "naming_series",
-  "patient",
-  "insurance_company",
-  "insurance_assignment",
-  "assignment_validity",
   "reference_dt",
   "reference_dn",
+  "patient",
+  "insurance_assignment",
+  "insurance_company",
+  "assignment_validity",
   "coverage",
   "column_break_8",
   "mode_of_approval",
@@ -30,8 +30,7 @@
    "in_list_view": 1,
    "label": "Insurance Company",
    "options": "Insurance Company",
-   "reqd": 1,
-   "set_only_once": 1
+   "read_only": 1
   },
   {
    "fieldname": "insurance_assignment",
@@ -39,8 +38,8 @@
    "in_list_view": 1,
    "label": "Insurance Assignment",
    "options": "Insurance Assignment",
-   "reqd": 1,
-   "set_only_once": 1
+   "read_only": 1,
+   "reqd": 1
   },
   {
    "fieldname": "amended_from",
@@ -55,15 +54,15 @@
    "fieldname": "assignment_validity",
    "fieldtype": "Date",
    "label": "Assignment Validity",
-   "set_only_once": 1
+   "read_only": 1
   },
   {
    "fieldname": "patient",
    "fieldtype": "Link",
    "label": "Patient",
    "options": "Patient",
-   "reqd": 1,
-   "set_only_once": 1
+   "read_only": 1,
+   "reqd": 1
   },
   {
    "fieldname": "mode_of_approval",
@@ -108,7 +107,8 @@
    "fieldname": "items",
    "fieldtype": "Table",
    "label": "Items",
-   "options": "Insurance Approval Item"
+   "options": "Insurance Approval Item",
+   "reqd": 1
   },
   {
    "fieldname": "column_break_8",
@@ -118,25 +118,23 @@
    "fieldname": "coverage",
    "fieldtype": "Percent",
    "label": "Coverage",
-   "set_only_once": 1
+   "read_only": 1
   },
   {
    "fieldname": "reference_dt",
    "fieldtype": "Link",
    "label": "Reference DocType",
-   "options": "DocType",
-   "set_only_once": 1
+   "options": "DocType"
   },
   {
    "fieldname": "reference_dn",
    "fieldtype": "Dynamic Link",
    "label": "Reference Name",
-   "options": "reference_dt",
-   "set_only_once": 1
+   "options": "reference_dt"
   }
  ],
  "is_submittable": 1,
- "modified": "2020-05-01 11:23:10.787073",
+ "modified": "2020-05-23 06:39:50.711381",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Insurance Approval",

@@ -1866,6 +1866,58 @@ def get_practitioner_appointment_type(doctype, txt, searchfield, start, page_len
 
 def create_insurance_approval_doc(doc):
 	insurance_assignment = frappe.get_doc("Insurance Assignment", doc.insurance)
+	items = create_insurance_approval_items(doc.doctype, doc.name)
+	if items:
+		insurance_approval = frappe.new_doc("Insurance Approval")
+		insurance_approval.patient = doc.patient
+		insurance_approval.reference_dt = doc.doctype
+		insurance_approval.reference_dn = doc.name
+		insurance_approval.insurance_assignment = doc.insurance
+		insurance_approval.insurance_company = insurance_assignment.insurance_company
+		insurance_approval.assignment_validity = insurance_assignment.end_date
+		insurance_approval.coverage = insurance_assignment.coverage
+		insurance_approval.set('items', items)
+		insurance_approval.save(ignore_permissions=True)
+
+def check_insurance_validity_on_item(insurance, service_item, valid_date):
+	if not  valid_date:
+		valid_date=nowdate()
+	is_valid = False
+	healthcare_insurance = frappe.get_doc("Insurance Assignment", insurance)
+	service_item_group = frappe.get_value("Item", service_item, "item_group")
+	if healthcare_insurance and valid_insurance(healthcare_insurance.name, valid_date):
+		insurance_contract = frappe.get_doc("Insurance Contract",
+			{
+				"insurance_company": healthcare_insurance.insurance_company,
+				"is_active": 1
+			}
+		)
+		item_price = frappe.db.exists("Item Price",
+		{
+			'item_code': service_item,
+			'price_list': insurance_contract.price_list
+		})
+		if item_price:
+			is_valid=True
+	return is_valid
+
+def check_insurance_approval_on_item(doc_name, service_item, posting_date):
+	approved_qty = 0
+	insurance_approval = False
+	if doc_name:
+		if frappe.db.exists("Insurance Approval", {"reference_dn": doc_name, "docstatus" : 1, 'approval_validity_end_date':("<=", getdate(posting_date))}):
+			approval =  frappe.get_doc("Insurance Approval", {"reference_dn": doc_name, "docstatus" : 1, })
+			if approval:
+				if approval.items:
+					for item in approval.items:
+						if item.item == service_item and item.approval_status == "Approved" :
+							approved_qty = item.approved_quantity - item.billed_quantity
+							insurance_approval = approval.name
+	return approved_qty, insurance_approval
+
+@frappe.whitelist()
+def create_insurance_approval_items(doctype, docname):
+	doc = frappe.get_doc(doctype, docname)
 	items = []
 	if doc.doctype == "Patient Encounter":
 		encounter_item = service_item_and_practitioner_charge(doc)[0]
@@ -1978,52 +2030,4 @@ def create_insurance_approval_doc(doc):
 						'item' : radiology_item_code,
 						'requested_quantity' : qty
 					})
-	if items:
-		insurance_approval = frappe.new_doc("Insurance Approval")
-		insurance_approval.patient = doc.patient
-		insurance_approval.reference_dt = doc.doctype
-		insurance_approval.reference_dn = doc.name
-		insurance_approval.insurance_assignment = doc.insurance
-		insurance_approval.insurance_company = insurance_assignment.insurance_company
-		insurance_approval.assignment_validity = insurance_assignment.end_date
-		insurance_approval.coverage = insurance_assignment.coverage
-		insurance_approval.set('items', items)
-		insurance_approval.save(ignore_permissions=True)
-
-def check_insurance_validity_on_item(insurance, service_item, valid_date):
-	if not  valid_date:
-		valid_date=nowdate()
-	is_valid = False
-	healthcare_insurance = frappe.get_doc("Insurance Assignment", insurance)
-	service_item_group = frappe.get_value("Item", service_item, "item_group")
-	if healthcare_insurance and valid_insurance(healthcare_insurance.name, valid_date):
-		insurance_contract = frappe.get_doc("Insurance Contract",
-			{
-				"insurance_company": healthcare_insurance.insurance_company,
-				"is_active": 1
-			}
-		)
-		item_price = frappe.db.exists("Item Price",
-		{
-			'item_code': service_item,
-			'price_list': insurance_contract.price_list
-		})
-		if item_price:
-			is_valid=True
-	return is_valid
-
-def check_insurance_approval_on_item(doc_name, service_item, posting_date):
-	approved_qty = 0
-	insurance_approval = False
-	if doc_name:
-		if frappe.db.exists("Insurance Approval", {"reference_dn": doc_name, "docstatus" : 1, 'approval_validity_end_date':("<=", getdate(posting_date))}):
-			approval =  frappe.get_doc("Insurance Approval", {"reference_dn": doc_name, "docstatus" : 1, })
-			if approval:
-				if approval.items:
-					for item in approval.items:
-						if item.item == service_item and item.approval_status == "Approved" :
-							approved_qty = item.approved_quantity - item.billed_quantity
-							insurance_approval = approval.name
-	return approved_qty, insurance_approval
-
-
+	return items
