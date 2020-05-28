@@ -111,7 +111,11 @@ def validate_event_overlap(doc):
 			)
 			and
 			(
-				from_time between %(from_time)s and %(to_time)s or to_time between %(from_time)s and %(to_time)s
+				(from_time > %(from_time)s and from_time < %(to_time)s)
+				or
+				(to_time > %(from_time)s and to_time < %(to_time)s)
+				or
+				(from_time between %(from_time)s and %(to_time)s) and (to_time between %(from_time)s and %(to_time)s)
 				or
 				(from_time < %(from_time)s and to_time > %(to_time)s)
 			)
