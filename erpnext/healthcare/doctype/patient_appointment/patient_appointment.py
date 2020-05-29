@@ -637,7 +637,7 @@ def get_context(doc):
 def appointment_action(appointment_obj, action_type, status=False):
 	if action_type == "SMS":
 		appointment_reminder_list = frappe.get_list("Appointment Action",{"parentfield": "appointment_action",
-		"parent": "Healthcare Settings"})
+		"parent": "Healthcare Settings", "action_on": "Value Change"})
 		if appointment_reminder_list and len(appointment_reminder_list) > 0:
 			for appointment_reminder in appointment_reminder_list:
 				reminder_obj = frappe.get_doc("Appointment Action", appointment_reminder.name)
@@ -662,8 +662,6 @@ def appointment_action(appointment_obj, action_type, status=False):
 						elif db_appointment_field != obj_appointment_field:
 							send_sms = True
 					elif not status and appointment_obj.status == reminder_obj.appointment_status and db_appointment_field and db_appointment_field != obj_appointment_field:
-						send_sms = True
-					if reminder_obj.action_on == "Time Before":
 						send_sms = True
 				if send_sms:
 					message = reminder_obj.message_content
