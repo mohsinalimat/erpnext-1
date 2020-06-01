@@ -13,6 +13,8 @@ class PractitionerEvent(Document):
 		self.validate_repeat_on()
 		if self.present == 1:
 			validate_duration(self)
+		else:
+			validate_existing_appointment(self)
 		validate_date(self)
 		validate_overlap(self)
 		self.to_date = self.from_date
@@ -40,7 +42,23 @@ def validate_duration(doc):
 			frappe.throw(_("Duration between from time and to time must be greater than or equal to duration given"))
 		elif total_time_diff % doc.duration != 0:
 			frappe.throw(_("Duration between from time and to time must be multiple of duration given"))
-
+def validate_existing_appointment(doc):
+	appointment_query = """
+		select
+			name
+		from
+			`tabPatient Appointment`
+		where
+			 practitioner = %(practitioner)s and docstatus < 2 and appointment_date = %(from_date)s and (appointment_time between %(from_time)s and %(to_time)s)
+		"""
+	appointments = frappe.db.sql(appointment_query.format(doc.doctype),{
+			"practitioner": doc.get("practitioner"),
+			"from_date": doc.from_date,
+			"from_time": doc.from_time,
+			"to_time": doc.to_time,
+		}, as_dict = 1)
+	if appointments:
+		frappe.throw(_("Cannot create event!  There are booked appointments at the time, cancel them and proceed."))
 def validate_date(doc):
 	if doc.repeat_this_event == 1 and doc.repeat_till and getdate(doc.from_date) > getdate(doc.repeat_till):
 		frappe.throw(_("Practitioner Event Repeat Till must be after From Date"))
