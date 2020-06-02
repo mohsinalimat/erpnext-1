@@ -49,7 +49,7 @@ def validate_existing_appointment(doc):
 		from
 			`tabPatient Appointment`
 		where
-			 practitioner = %(practitioner)s and docstatus < 2 and appointment_date = %(from_date)s and (appointment_time between %(from_time)s and %(to_time)s)
+			 practitioner = %(practitioner)s and docstatus < 2 and appointment_date = %(from_date)s and (appointment_time >= %(from_time)s and appointment_time < %(to_time)s)
 		"""
 	appointments = frappe.db.sql(appointment_query.format(doc.doctype),{
 			"practitioner": doc.get("practitioner"),
