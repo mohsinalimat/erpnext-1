@@ -16,8 +16,8 @@ class PractitionerEvent(Document):
 		else:
 			validate_existing_appointment(self)
 		validate_date(self)
-		validate_overlap(self)
 		self.to_date = self.from_date
+		validate_overlap(self)
 		validate_service_unit_capacity(self)
 
 	def validate_repeat_on(self):
