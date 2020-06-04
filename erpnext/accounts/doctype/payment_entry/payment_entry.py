@@ -1016,6 +1016,14 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 		})
 
 	pe.setup_party_account_field()
+	# Healthcare
+	domain_settings = frappe.get_doc('Domain Settings')
+	active_domains = [d.domain for d in domain_settings.active_domains]
+
+	if "Healthcare" in active_domains:
+		if doc.doctype == "Sales Invoice" and frappe.get_meta("Sales Invoice").has_field("patient"):
+			if frappe.get_meta("Payment Entry").has_field("patient"):
+				pe.patient = doc.patient
 	pe.set_missing_values()
 	if party_account and bank:
 		pe.set_exchange_rate()
