@@ -22,9 +22,17 @@ frappe.ui.form.on('Practitioner Event', {
 		if(frm.doc.service_unit){
 			frappe.db.get_value('Healthcare Service Unit', {name: frm.doc.service_unit}, 'total_service_unit_capacity', (r) => {
 				if(r.total_service_unit_capacity){
+					frm.set_df_property("total_service_unit_capacity", "hidden", 0);
+					frm.set_df_property("appointment_type", "reqd", 1);
+					frm.set_df_property("duration", "reqd", 1);
 					frm.set_value("total_service_unit_capacity", r.total_service_unit_capacity);
 					var desp_str='Maximum Capacity '+ r.total_service_unit_capacity
 					frm.set_df_property("total_service_unit_capacity", "description", desp_str);
+				}
+				else{
+					frm.set_df_property("total_service_unit_capacity", "hidden", 1);
+					frm.set_df_property("appointment_type", "reqd", 0);
+					frm.set_df_property("duration", "reqd", 0);
 				}
 			});
 		}
