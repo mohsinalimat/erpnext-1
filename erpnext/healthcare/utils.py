@@ -388,7 +388,7 @@ def get_healthcare_services_to_invoice(patient, posting_date, validate_insurance
 									insurance_details = get_insurance_details(procedure_obj.insurance, procedure_service_item, patient, valid_date)
 							if include_in_insurance and insurance_details:
 								invoice_item={'reference_dt': 'Radiology Examination', 'reference_dn': procedure_obj.name, 'item_name':service_item_name,
-								'cost_center': cost_center if cost_center else '', 'item_code': procedure_service_item, 
+								'cost_center': cost_center if cost_center else '', 'item_code': procedure_service_item,
 								'discount_percentage': insurance_details.discount, 'insurance_claim_coverage': insurance_details.coverage, 'insurance_approval_number': procedure_obj.insurance_approval_number if procedure_obj.insurance_approval_number else ''}
 								if insurance_details.rate:
 									invoice_item['rate'] = insurance_details.rate
@@ -899,7 +899,7 @@ def appointments_valid_in_fee_validity(appointment, invoiced):
 	if int(max_visit) < 1:
 		max_visit = 1
 	valid_days_date = add_days(getdate(appointment.appointment_date), int(valid_days))
-	return frappe.get_list("Patient Appointment",{'patient': appointment.patient, 'invoiced': invoiced,
+	return frappe.get_list("Patient Appointment",{'patient': appointment.patient, 'invoiced': invoiced, 'name': appointment.name,
 	'appointment_date':("<=", valid_days_date), 'appointment_date':(">=", getdate(appointment.appointment_date)),
 	'practitioner': appointment.practitioner}, order_by="appointment_date", limit=int(max_visit)-1)
 
