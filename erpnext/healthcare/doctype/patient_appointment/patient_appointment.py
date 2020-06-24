@@ -30,6 +30,8 @@ class PatientAppointment(Document):
 				frappe.db.set_value("Patient Appointment", self.name, "companion", companion.name)
 		self.reload()
 	def validate(self):
+		if frappe.db.exists('Patient Appointment', { 'appointment_date': self.appointment_date, 'appointment_time': self.appointment_time, 'patient':self.patient }):
+			frappe.throw(_('Appointment is already existing for the patient at the same time'))
 		end_time = datetime.datetime.combine(getdate(self.appointment_date), get_time(self.appointment_time)) + datetime.timedelta(minutes=float(self.duration))
 		query = """
 			select
