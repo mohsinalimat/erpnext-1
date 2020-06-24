@@ -550,6 +550,8 @@ def confirm_sms(doc):
 	if getdate(doc.appointment_date) >= getdate(datetime.date.today()):
 		if frappe.db.get_value("Healthcare Settings", None, "app_con") == '1':
 			send_confirmation = True
+			if frappe.db.get_value("Healthcare Settings", None, "avoid_sms_pr") == '1' and doc.procedure_template:
+				send_confirmation = False
 			if getdate(datetime.date.today()) == getdate(doc.appointment_date) and frappe.db.get_value("Healthcare Settings", None, "no_con") == '1':
 				send_confirmation = False
 			if send_confirmation:
