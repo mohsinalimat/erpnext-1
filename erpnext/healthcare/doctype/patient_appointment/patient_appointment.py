@@ -14,6 +14,7 @@ from erpnext.hr.doctype.employee.employee import is_holiday
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import set_revenue_sharing_distribution
 from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_receivable_account,get_income_account
 from erpnext.healthcare.utils import validity_exists, service_item_and_practitioner_charge, sales_item_details_for_healthcare_doc, get_insurance_details, create_companion_contact, create_insurance_approval_doc
+import datetime
 
 class PatientAppointment(Document):
 	def on_update(self):
@@ -30,8 +31,11 @@ class PatientAppointment(Document):
 				frappe.db.set_value("Patient Appointment", self.name, "companion", companion.name)
 		self.reload()
 	def validate(self):
-		if frappe.db.exists('Patient Appointment', { 'appointment_date': self.appointment_date, 'appointment_time': self.appointment_time, 'patient':self.patient }):
-			frappe.throw(_('Appointment is already existing for the patient at the same time'))
+		if not self.is_new():
+			old_doc = self.get_doc_before_save()
+			if str(old_doc.appointment_date) != self.appointment_date or str(old_doc.appointment_time) != self.appointment_time:
+				verify_repetition(self)
+
 		end_time = datetime.datetime.combine(getdate(self.appointment_date), get_time(self.appointment_time)) + datetime.timedelta(minutes=float(self.duration))
 		query = """
 			select
@@ -131,6 +135,11 @@ class PatientAppointment(Document):
 				is_insurance_approval = frappe.get_value("Insurance Company", (frappe.get_value("Insurance Assignment", self.insurance, "insurance_company")), "is_insurance_approval")
 				if is_insurance_approval:
 					create_insurance_approval_doc(self)
+
+	def before_insert(self):
+		verify_repetition(self)
+
+
 @frappe.whitelist()
 def invoice_appointment(appointment_doc, is_pos):
 	if not appointment_doc.name:
@@ -748,3 +757,7 @@ def invoice_from_appointment(appointment_id):
 	appointment = frappe.get_doc("Patient Appointment", appointment_id)
 	sales_invoice = set_invoice_details_for_appointment(appointment, False)
 	return sales_invoice.as_dict() if sales_invoice else False
+
+def verify_repetition(doc):
+	if frappe.db.exists('Patient Appointment', { 'appointment_date': doc.appointment_date, 'appointment_time': doc.appointment_time, 'patient':doc.patient }):
+		frappe.throw(_('Appointment is already existing for the patient at the same time'))
