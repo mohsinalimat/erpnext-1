@@ -568,7 +568,6 @@ def create_procedure_from_encounter(patient_encounter, procedure_template, presc
 	procedure = create_clinical_procedure_doc(False, encounter.practitioner, frappe.get_doc("Patient", patient),
 		frappe.get_doc("Clinical Procedure Template", procedure_template), source=encounter.source, ref_practitioner=encounter.referring_practitioner,insurance=encounter.insurance)
 	procedure.prescription = prescription
-	procedure.save(ignore_permissions = True)
 	return procedure.as_dict()
 
 
