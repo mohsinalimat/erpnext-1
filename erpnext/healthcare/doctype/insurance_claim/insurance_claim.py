@@ -73,3 +73,28 @@ class InsuranceClaim(Document):
 				frappe.db.set_value("Insurance Claim", self.name, "approved_amount", total_approved_amount)
 			if total_rejected_amount:
 				frappe.db.set_value("Insurance Claim", self.name, "rejected_amount", total_rejected_amount)
+
+@frappe.whitelist()
+def get_claim_item(sales_invoice, insurance):
+	from erpnext.healthcare.utils import set_insurance_claim_item
+	if sales_invoice:
+		sales_invoice = frappe.get_doc("Sales Invoice", sales_invoice)
+		insurance = frappe.get_doc("Insurance Assignment", insurance)
+		if sales_invoice.items:
+			insurance_claim_item=[]
+			for item in sales_invoice.items:
+				if item.insurance_claim_coverage and item.reference_dt and item.insurance_item != 1:
+					if frappe.get_meta(item.reference_dt).has_field("insurance"):
+						reference_doc = frappe.get_doc(item.reference_dt, item.reference_dn)
+					elif item.reference_dt in  ['Lab Prescription', 'Procedure Prescription', 'Inpatient Occupancy', 'Drug Prescription']:
+						reference_obj = frappe.get_doc(item.reference_dt, item.reference_dn)
+						if frappe.get_meta(reference_obj.parenttype).has_field("insurance"):
+							reference_doc = frappe.get_doc(reference_obj.parenttype,  reference_obj.parent)
+					if reference_doc.insurance and reference_doc.insurance== insurance.name :
+						insurance_remarks=''
+						if frappe.db.has_column(item.reference_dt, 'insurance_remarks'):
+							insurance_remarks = reference_doc.insurance_remarks
+						insurance_claim_item.append(set_insurance_claim_item(item, sales_invoice, insurance, insurance_remarks))
+				elif item.insurance_claim_coverage and item.insurance_item == 1:
+					insurance_claim_item.append(set_insurance_claim_item(item, sales_invoice, insurance))
+		return insurance_claim_item ,sales_invoice.total ,sales_invoice.total_insurance_claim_amount
