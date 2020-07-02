@@ -31,6 +31,7 @@ frappe.ui.form.on('Practitioner Event', {
 				}
 				else{
 					frm.set_df_property("total_service_unit_capacity", "hidden", 1);
+					frm.set_value("total_service_unit_capacity", '');
 					frm.set_df_property("appointment_type", "reqd", 0);
 					frm.set_df_property("duration", "reqd", 0);
 				}
@@ -48,6 +49,7 @@ frappe.ui.form.on('Practitioner Event', {
 		});
 	},
 	event_type: function(frm) {
+
 		set_event_type_properties_to_event(frm);
 	},
 	appointment_type: function(frm) {
@@ -100,6 +102,11 @@ var set_event_type_properties_to_event = function(frm){
 		frm.set_df_property("event", "read_only", 0);
 		frm.set_df_property("appointment_type", "read_only", 0);
 		frm.set_df_property("color", "read_only", 0);
-		frm.set_df_property("duration", "read_only", 0);
+			if(!frm.doc.total_service_unit_capacity && !frm.doc.total_service_unit_capacity>0){
+				frm.set_df_property("duration", "read_only", 0);
+			}
+			else{
+				frm.set_df_property("duration", "read_only", 1);
+			}
 	}
 }
