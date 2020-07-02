@@ -38,7 +38,7 @@ class InsuranceClaim(Document):
 			if frappe.db.get_value("Healthcare Settings", None, "journal_entry_series"):
 				journal_entry.naming_series =frappe.db.get_value("Healthcare Settings", None, "journal_entry_series")
 			journal_entry.company = sales_invoice.company
-			journal_entry.posting_date =  nowdate()
+			journal_entry.posting_date =  self.created_on
 			accounts = []
 			tax_amount = 0.0
 			accounts.append({
