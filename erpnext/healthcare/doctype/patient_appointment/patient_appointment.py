@@ -18,8 +18,8 @@ import datetime
 
 class PatientAppointment(Document):
 	def on_update(self):
-		if self.status in ["Open", "Scheduled", "Pending"]:
-			update_status(self.name, self.status)
+		# if self.status in ["Open", "Scheduled", "Pending"]:
+		# 	update_status(self.name, self.status)
 		if self.companion_mobile and self.companion_name:
 			companion_details = {
 				'first_name': self.companion_name,
@@ -515,8 +515,11 @@ def get_availability_data(date, practitioner):
 def update_status(appointment_id, status):
 	if status == "Cancelled":
 		appointment_cancel(appointment_id)
-	appointment_action(frappe.get_doc("Patient Appointment", appointment_id), "SMS", status)
-	frappe.db.set_value("Patient Appointment", appointment_id, "status", status)
+	appointment_doc = frappe.get_doc("Patient Appointment", appointment_id)
+	appointment_action(appointment_doc, "SMS", status)
+	appointment_doc.reload()
+	appointment_doc.status = status
+	appointment_doc.save(ignore_permissions=True)
 
 def appointment_cancel(appointment_id):
 	appointment = frappe.get_doc("Patient Appointment", appointment_id)

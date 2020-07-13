@@ -1335,8 +1335,6 @@ var cancellation_reasons = function(frm) {
 			frm.set_value('cancellation_notes', d_reasons.get_value('cancellation_notes'));
 			d_reasons.hide();
 			frm.enable_save();
-			frm.save();
-			frm.enable_save();
 			d_reasons.get_primary_btn().attr('disabled', true);
 			update_status(frm, "Cancelled")
 		}
