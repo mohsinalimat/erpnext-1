@@ -133,6 +133,8 @@ class PatientAppointment(Document):
 				invoice_appointment(self, False)
 		#Alert
 		confirm_sms(self)
+		creation_on_action(self, "SMS")
+
 		if self.insurance:
 			if self.procedure_template or self.radiology_procedure:
 				is_insurance_approval = frappe.get_value("Insurance Company", (frappe.get_value("Insurance Assignment", self.insurance, "insurance_company")), "is_insurance_approval")
@@ -679,6 +681,22 @@ def appointment_action(appointment_obj, action_type, status=False):
 					elif not status and appointment_obj.status == reminder_obj.appointment_status and db_appointment_field and db_appointment_field != obj_appointment_field:
 						send_sms = True
 				if send_sms:
+					message = reminder_obj.message_content
+					send_message(appointment_obj, message)
+
+def creation_on_action(appointment_obj, action_type):
+	if action_type == "SMS":
+		appointment_reminder_list = frappe.get_list("Appointment Action",{"parentfield": "appointment_action",
+		"parent": "Healthcare Settings", "action_on": "On Creation"})
+		if appointment_reminder_list and len(appointment_reminder_list) > 0:
+			for appointment_reminder in appointment_reminder_list:
+				reminder_obj = frappe.get_doc("Appointment Action", appointment_reminder.name)
+				condition_satisfy = True
+				if reminder_obj.condition:
+					context = get_context(appointment_obj)
+					if not frappe.safe_eval(reminder_obj.condition, {'frappe': frappe}, context):
+						condition_satisfy = False
+				if condition_satisfy:
 					message = reminder_obj.message_content
 					send_message(appointment_obj, message)
 
