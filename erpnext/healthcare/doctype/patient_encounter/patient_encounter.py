@@ -16,6 +16,13 @@ class PatientEncounter(Document):
 			service_unit_company = frappe.db.get_value("Healthcare Service Unit", self.service_unit, "company")
 			if service_unit_company and service_unit_company != self.company:
 				self.company = service_unit_company
+		if self.appointment:
+			existing_encounter = frappe.db.exists('Patient Encounter', {'appointment': self.appointment, 'docstatus': 1})
+			print(existing_encounter)
+			if existing_encounter:
+				msg = _("Already created Patient Encounter- ")
+				msg +=  " <b><a href='#Form/Patient Encounter/{0}'>{0}</a></b> for appointment {1}".format(self.name, self.appointment)
+				frappe.throw(msg, title=_('Not Allowed'))
 
 	def on_update(self):
 		if self.appointment and self.docstatus == 0:
