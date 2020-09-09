@@ -1431,20 +1431,21 @@ def manage_insurance_claim_on_si_cancel(doc):
 			frappe.db.set_value("Insurance Claim", claim_obj.name, "claim_status", "Cancelled")
 def create_insurance_claim(insurance, amount, doc):
 	insurance_claim=frappe.new_doc('Insurance Claim')
-	insurance_claim.patient=doc.patient
-	insurance_claim.insurance_company=insurance.insurance_company
-	insurance_claim.insurance_assignment=insurance.name
+	insurance_claim.patient = doc.patient
+	insurance_claim.insurance_company = insurance.insurance_company
+	insurance_claim.insurance_assignment = insurance.name
 	if doc.inpatient_record and insurance.ip_coverage:
-		insurance_claim.claim_percentage=insurance.ip_coverage
-		insurance_claim.claim_amount=amount*0.01*insurance.ip_coverage
+		insurance_claim.claim_percentage = insurance.ip_coverage
+		insurance_claim.claim_amount = amount*0.01*insurance.ip_coverage
 	else:
-		insurance_claim.claim_percentage=insurance.coverage
-		insurance_claim.claim_amount=amount*0.01*insurance.coverage
-	insurance_claim.bill_amount=amount
-	insurance_claim.created_by=frappe.session.user
-	insurance_claim.created_on=nowdate()
-	insurance_claim.sales_invoice=doc.name
-	insurance_claim.claim_status="Claim Created"
+		insurance_claim.claim_percentage = insurance.coverage
+		insurance_claim.claim_amount = amount*0.01*insurance.coverage
+	insurance_claim.bill_amount = amount
+	insurance_claim.created_by = frappe.session.user
+	insurance_claim.created_on = nowdate()
+	insurance_claim.sales_invoice = doc.name
+	insurance_claim.si_posting_date = doc.posting_date
+	insurance_claim.claim_status = "Claim Created"
 	insurance_claim_item=[]
 	for item in doc.items:
 		if item.insurance_claim_coverage and item.reference_dt and item.insurance_item != 1:

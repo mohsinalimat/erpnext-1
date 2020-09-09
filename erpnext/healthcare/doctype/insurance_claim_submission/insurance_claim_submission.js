@@ -50,6 +50,9 @@ frappe.ui.form.on('Insurance Claim Submission', {
 	insurance_company: function(frm){
 		get_insurance_claim(frm);
 	},
+	posting_date_type: function(frm){
+		get_insurance_claim(frm);
+	},
 	make_payment_entry: function(frm) {
 		return frappe.call({
 			method: "create_payment_entry",
@@ -122,29 +125,33 @@ var get_insurance_claim = function(frm){
 		if(frm.doc.to_date){
 			args['to_date'] = frm.doc.to_date
 		}
+		args['posting_date_type'] = frm.doc.posting_date_type
 		frappe.call({
 			"method": "erpnext.healthcare.doctype.insurance_claim_submission.insurance_claim_submission.get_claim_submission_item",
 			args:args,
 			callback: function (data) {
+
 					var item_fields = ['sales_invoice' , 'patient', 'patient_name',  'insurance_company','insurance_assignment','date_of_service',
 										'item_code','item_name','discount_percentage','insurance_company_name', 'discount_amount','rate','amount',
 										'insurance_claim_coverage', 'insurance_claim_amount', 'claim_status', 'insurance_approval_number', 'insurance_remarks' ]
-				data.message.forEach(function(claim){
-					$.each(claim.insurance_claim_item, function(i, claim_item) {
-						var child_item=frappe.model.add_child(frm.doc, "Insurance Claim Item", "insurance_claim_submission_item")
-						$.each(claim_item, function(field, value) {
-							if(item_fields.includes(field)){
-								frappe.model.set_value(child_item.doctype, child_item.name, field, value);
-							}
-							if(field == 'parent'){
-								frappe.model.set_value(child_item.doctype, child_item.name, 'insurance_claim', value);
-							}
-							if(field=='name'){
-								frappe.model.set_value(child_item.doctype, child_item.name, 'insurance_claim_item', value);
-							}
+				if(data.message){
+					data.message.forEach(function(claim){
+						$.each(claim.insurance_claim_item, function(i, claim_item) {
+							var child_item=frappe.model.add_child(frm.doc, "Insurance Claim Item", "insurance_claim_submission_item")
+							$.each(claim_item, function(field, value) {
+								if(item_fields.includes(field)){
+									frappe.model.set_value(child_item.doctype, child_item.name, field, value);
+								}
+								if(field == 'parent'){
+									frappe.model.set_value(child_item.doctype, child_item.name, 'insurance_claim', value);
+								}
+								if(field=='name'){
+									frappe.model.set_value(child_item.doctype, child_item.name, 'insurance_claim_item', value);
+								}
+							});
 						});
 					});
-				});
+				}
 				frm.refresh_fields();
 				set_total_Claim_Amount(frm);
 			}

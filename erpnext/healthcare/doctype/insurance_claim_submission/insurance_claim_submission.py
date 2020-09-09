@@ -153,7 +153,7 @@ class InsuranceClaimSubmission(Document):
 		return True
 
 @frappe.whitelist()
-def get_claim_submission_item(insurance_company, from_date=False, to_date=False):
+def get_claim_submission_item(insurance_company, from_date=False, to_date=False, posting_date_type = ''):
 	query = """
 		select
 			name
@@ -162,10 +162,17 @@ def get_claim_submission_item(insurance_company, from_date=False, to_date=False)
 		where
 			insurance_company='{0}' and docstatus=1  and claim_status="Claim Created"
 	"""
-	if from_date:
-		query += """ and created_on >=%(from_date)s"""
-	if to_date:
-		query += """ and created_on <=%(to_date)s"""
+	if posting_date_type == 'Claim Posting Date':
+		if from_date:
+			query += """ and created_on >=%(from_date)s"""
+		if to_date:
+			query += """ and created_on <=%(to_date)s"""
+	else:
+		if from_date:
+			query += """ and si_posting_date >=%(from_date)s"""
+		if to_date:
+			query += """ and si_posting_date <=%(to_date)s"""
+
 	claim_list = frappe.db.sql(query.format(insurance_company),{
 			'from_date': from_date, 'to_date':to_date
 		}, as_dict=True)
@@ -176,6 +183,3 @@ def get_claim_submission_item(insurance_company, from_date=False, to_date=False)
 	if claim_list_obj and len(claim_list_obj)>0:
 		return claim_list_obj
 	return False
-
-
-	

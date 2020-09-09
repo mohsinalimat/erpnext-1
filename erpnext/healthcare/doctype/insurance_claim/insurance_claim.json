@@ -10,6 +10,7 @@
   "patient_name",
   "insurance_assignment",
   "sales_invoice",
+  "si_posting_date",
   "bill_amount",
   "claim_percentage",
   "claim_amount",
@@ -155,7 +156,7 @@
   {
    "fieldname": "created_on",
    "fieldtype": "Date",
-   "label": "Posting Date"
+   "label": "Claim Posting Date"
   },
   {
    "fieldname": "column_break_14",
@@ -207,10 +208,17 @@
    "hidden": 1,
    "label": "Company",
    "options": "Company"
+  },
+  {
+   "fetch_from": "sales_invoice.posting_date",
+   "fetch_if_empty": 1,
+   "fieldname": "si_posting_date",
+   "fieldtype": "Date",
+   "label": "Sales Invoice  Posting Date"
   }
  ],
  "is_submittable": 1,
- "modified": "2020-07-01 23:11:37.530945",
+ "modified": "2020-09-07 14:18:08.884716",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Insurance Claim",
