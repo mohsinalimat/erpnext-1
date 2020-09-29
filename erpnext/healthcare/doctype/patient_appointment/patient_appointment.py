@@ -31,6 +31,7 @@ class PatientAppointment(Document):
 				frappe.db.set_value("Patient Appointment", self.name, "companion", companion.name)
 		self.reload()
 	def validate(self):
+		patient_validation(self)
 		if not self.is_new():
 			old_doc = self.get_doc_before_save()
 			if old_doc:
@@ -781,3 +782,6 @@ def invoice_from_appointment(appointment_id):
 def verify_repetition(doc):
 	if frappe.db.exists('Patient Appointment', { 'appointment_date': doc.appointment_date, 'appointment_time': doc.appointment_time, 'patient':doc.patient, 'status':['!=', "Cancelled"]}):
 		frappe.throw(_('Appointment is already existing for the patient at the same time'))
+def patient_validation(doc):
+	if not  frappe.db.exists('Patient', doc.patient):
+		frappe.throw(_('Invalid Patient'))
