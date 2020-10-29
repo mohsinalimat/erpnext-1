@@ -519,7 +519,7 @@ def update_status(appointment_id, status):
 	if status == "Cancelled":
 		appointment_cancel(appointment_id)
 	appointment_doc = frappe.get_doc("Patient Appointment", appointment_id)
-	appointment_action(appointment_doc, "SMS", status)
+	# appointment_action(appointment_doc, "SMS", status)
 	appointment_doc.reload()
 	appointment_doc.status = status
 	appointment_doc.save(ignore_permissions=True)
