@@ -92,7 +92,7 @@ class PatientAppointment(Document):
 			status = "Scheduled"
 		elif today > appointment_date:
 			status = "Pending"
-		self.status = status
+		frappe.db.set_value("Patient Appointment", self.name, "status", status)
 		if self.procedure_prescription:
 			frappe.db.set_value("Procedure Prescription", self.procedure_prescription, "appointment_booked", True)
 			if self.procedure_template:
