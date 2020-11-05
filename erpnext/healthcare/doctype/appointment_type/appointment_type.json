@@ -111,7 +111,7 @@
    "label": "Inpatient Visit Charge"
   }
  ],
- "modified": "2020-11-03 16:14:55.232805",
+ "modified": "2020-11-05 17:39:19.706643",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Appointment Type",
@@ -147,6 +147,5 @@
  "search_fields": "appointment_type",
  "sort_field": "modified",
  "sort_order": "DESC",
- "track_changes": 1,
- "track_seen": 1
+ "track_changes": 1
 }
