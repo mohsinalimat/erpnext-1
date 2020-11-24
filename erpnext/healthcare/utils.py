@@ -1426,7 +1426,7 @@ def manage_insurance_claim_on_si_cancel(doc):
 			})
 	if claim:
 		claim_obj = frappe.get_doc("Insurance Claim", claim)
-		if claim_obj.claim_status=="Claim Created":
+		if claim_obj.claim_status=="Claim Created" and claim_obj.docstatus == 1:
 			claim_obj.cancel()
 			frappe.db.set_value("Insurance Claim", claim_obj.name, "claim_status", "Cancelled")
 def create_insurance_claim(insurance, amount, doc):

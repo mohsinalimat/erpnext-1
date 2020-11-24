@@ -21,7 +21,9 @@ class InsuranceClaim(Document):
 			})
 		if jv:
 			jv_obj = frappe.get_doc("Journal Entry", jv)
-			jv_obj.cancel()
+			if jv_obj.docstatus == 1:
+				jv_obj.cancel()
+
 	def on_update_after_submit(self):
 		self.calculate_total_approved_rejected_amount()
 
