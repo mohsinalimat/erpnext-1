@@ -784,8 +784,7 @@ def create_additional_salary(company, employee, component, amount):
 def set_invoiced(item, method, ref_invoice=None):
 	invoiced = False
 	if(method=="on_submit"):
-		# if not item.delivery_note:
-			# validate_invoiced_on_submit(item)
+		validate_invoiced_on_submit(item)
 		invoiced = True
 
 	if item.reference_dt == 'Inpatient Occupancy' and frappe.db.get_value("Healthcare Settings", None, "auto_invoice_inpatient") == '1':
@@ -814,8 +813,7 @@ def set_invoiced(item, method, ref_invoice=None):
 
 def validate_invoiced_on_submit(item):
 	if frappe.db.get_value(item.reference_dt, item.reference_dn, "invoiced") == 1:
-		msg_print(_("The item referenced by {0} - {1} is already invoiced"\
-		).format(item.reference_dt, item.reference_dn))
+		frappe.throw(_("The item referenced by {0} - {1} is already invoiced").format(item.reference_dt, item.reference_dn))
 
 
 def manage_prescriptions(invoiced, ref_dt, ref_dn, dt, created_check_field):
