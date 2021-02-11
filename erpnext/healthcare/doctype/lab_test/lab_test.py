@@ -21,6 +21,7 @@ class LabTest(Document):
 			if is_insurance_approval:
 				from erpnext.healthcare.utils import create_insurance_approval_doc
 				create_insurance_approval_doc(self)
+		make_insurance_claim(self)
 
 	def invoice(self):
 		if not self.invoiced:
@@ -536,3 +537,14 @@ def set_revenue_sharing_item(doc, dist_line, practitioner_charge_item, reference
 	if reference_doc.insurance and item_line.insurance_claim_coverage and float(item_line.insurance_claim_coverage) > 0:
 		item_line.insurance_claim_amount = item_line.amount*0.01*float(item_line.insurance_claim_coverage)
 		doc.total_insurance_claim_amount =+ item_line.insurance_claim_amount
+
+
+def make_insurance_claim(doc):
+	if doc.insurance_subscription and not doc.insurance_claim:
+		from erpnext.healthcare.utils import create_insurance_claim
+		billing_item = frappe.get_cached_value('Lab Test Template', doc.template, 'item')
+		insurance_claim, claim_status = create_insurance_claim(doc, 'Lab Test Template', doc.template, 1, billing_item)
+		if insurance_claim:
+			frappe.set_value(doc.doctype, doc.name ,'insurance_claim', insurance_claim)
+			frappe.set_value(doc.doctype, doc.name ,'claim_status', claim_status)
+			doc.reload()

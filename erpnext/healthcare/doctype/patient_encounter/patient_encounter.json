@@ -33,6 +33,12 @@
   "encounter_date",
   "encounter_time",
   "invoiced",
+  "insurance_section",
+  "insurance_subscription",
+  "insurance_claim",
+  "column_break_29",
+  "insurance_company",
+  "claim_status",
   "sb_symptoms",
   "symptoms_select",
   "symptoms",
@@ -87,13 +93,14 @@
   {
    "fieldname": "type",
    "fieldtype": "Link",
-   "hidden": 1,
    "ignore_user_permissions": 1,
    "label": "Type",
    "no_copy": 1,
    "options": "Appointment Type",
    "print_hide": 1,
-   "report_hide": 1
+   "read_only": 1,
+   "report_hide": 1,
+   "reqd": 1
   },
   {
    "fieldname": "patient",
@@ -137,12 +144,14 @@
    "fieldname": "insurance",
    "fieldtype": "Link",
    "label": "Insurance",
-   "options": "Insurance Assignment"
+   "options": "Insurance Assignment",
+   "read_only": 1
   },
   {
    "fetch_from": "insurance.insurance_company_name",
    "fieldname": "insurance_company_name",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Insurance Company Name",
    "read_only": 1
   },
@@ -150,12 +159,15 @@
    "depends_on": "insurance",
    "fieldname": "insurance_approval_number",
    "fieldtype": "Data",
-   "label": "Insurance Approval Number"
+   "hidden": 1,
+   "label": "Insurance Approval Number",
+   "read_only": 1
   },
   {
    "depends_on": "insurance",
    "fieldname": "insurance_remarks",
    "fieldtype": "Small Text",
+   "hidden": 1,
    "label": "Insurance Remarks",
    "read_only": 1
   },
@@ -365,10 +377,49 @@
    "options": "Patient Encounter",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "insurance_section",
+   "fieldtype": "Section Break",
+   "label": "Insurance"
+  },
+  {
+   "fieldname": "insurance_subscription",
+   "fieldtype": "Link",
+   "label": "Insurance Subscription",
+   "options": "Healthcare Insurance Subscription"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "insurance_claim",
+   "fieldtype": "Link",
+   "label": "Insurance Claim",
+   "options": "Healthcare Insurance Claim",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_29",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "insurance_subscription.insurance_company",
+   "fieldname": "insurance_company",
+   "fieldtype": "Link",
+   "label": "Insurance Company",
+   "options": "Healthcare Insurance Company",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "claim_status",
+   "fieldtype": "Select",
+   "label": "Claim Status",
+   "options": "\nPending\nApproved\nRejected\nInvoiced",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2019-12-12 14:39:32.046352",
+ "modified": "2021-02-04 13:33:02.614178",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Encounter",

@@ -9,6 +9,7 @@ from frappe.model.document import Document
 from frappe.utils import cstr
 from erpnext.healthcare.utils import manage_healthcare_doc_cancel, create_insurance_approval_doc
 from erpnext.healthcare.doctype.patient_appointment.patient_appointment import update_status
+from erpnext.healthcare.utils import create_insurance_claim
 
 class PatientEncounter(Document):
 	def validate(self):
@@ -50,10 +51,12 @@ class PatientEncounter(Document):
 	def on_submit(self):
 		if self.appointment:
 			update_status(self.appointment, "Closed")
-		if self.insurance:
-			is_insurance_approval = frappe.get_value("Insurance Company", (frappe.get_value("Insurance Assignment", self.insurance, "insurance_company")), "is_insurance_approval")
-			if is_insurance_approval:
-				create_insurance_approval_doc(self)
+		make_insurance_claim(self)
+		# if self.insurance:
+		# 	is_insurance_approval = frappe.get_value("Insurance Company", (frappe.get_value("Insurance Assignment", self.insurance, "insurance_company")), "is_insurance_approval")
+		# 	if is_insurance_approval:
+		# 		create_insurance_approval_doc(self)
+
 
 	def before_cancel(self):
 		self.validate_orders()
@@ -132,3 +135,46 @@ def set_subject_field(encounter):
 		subject += "\nProcedure(s) Prescribed."
 
 	return subject
+
+def make_insurance_claim(doc):
+	if doc.insurance_subscription:
+		from erpnext.healthcare.utils import create_insurance_claim, get_service_item_and_practitioner_charge
+		ip = True if doc.inpatient_record else False
+		billing_item, rate  = get_service_item_and_practitioner_charge(doc.practitioner, ip= ip, practitioner_event= None, appointment_type=doc.type)
+		insurance_claim, claim_status = create_insurance_claim(doc, 'Appointment Type', doc.type, 1, billing_item)
+		if insurance_claim:
+			frappe.set_value(doc.doctype, doc.name ,'insurance_claim', insurance_claim)
+			frappe.set_value(doc.doctype, doc.name ,'claim_status', claim_status)
+		if doc.lab_test_prescription:
+			for lab_rx in doc.lab_test_prescription:
+				if lab_rx.lab_test_code:
+					billing_item = frappe.get_cached_value('Lab Test Template', lab_rx.lab_test_code, 'item')
+					insurance_claim, claim_status = create_insurance_claim(doc, 'Lab Test Template', lab_rx.lab_test_code, 1, billing_item)
+					if insurance_claim:
+						frappe.db.set_value(lab_rx.doctype, lab_rx.name, "insurance_claim", insurance_claim)
+					if claim_status:
+						frappe.db.set_value(lab_rx.doctype, lab_rx.name, "claim_status", claim_status)
+		if doc.procedure_prescription:
+			for procedure_rx in doc.procedure_prescription:
+				if procedure_rx.procedure:
+					billing_item = frappe.get_cached_value('Clinical Procedure Template', procedure_rx.procedure, 'item')
+					insurance_claim, claim_status = create_insurance_claim(doc, 'Clinical Procedure Template', procedure_rx.procedure, 1, billing_item)
+					if insurance_claim:
+						frappe.db.set_value(procedure_rx.doctype, procedure_rx.name, "insurance_claim", insurance_claim)
+					if claim_status:
+						frappe.db.set_value(procedure_rx.doctype, procedure_rx.name, "claim_status", claim_status)
+		if doc.radiology_procedure_prescription:
+			for radiology in doc.radiology_procedure_prescription:
+				if radiology.radiology_procedure:
+					billing_item = frappe.get_cached_value('Radiology Procedure', radiology.radiology_procedure, 'item')
+					insurance_claim, status = create_insurance_claim(doc, 'Radiology Procedure', radiology.radiology_procedure, 1, billing_item)
+					if insurance_claim:
+						frappe.db.set_value(radiology.doctype, radiology.name, "insurance_claim", insurance_claim)
+					if claim_status:
+						frappe.db.set_value(radiology.doctype, radiology.name, "claim_status", claim_status)
+			# if doc.drug_prescription:
+			# 	for lab_rx in doc.drug_prescription:
+			# 		if lab_rx.lab_test_code:
+			# 			billing_item = frappe.get_cached_value('Lab Test Template', lab_rx.lab_test_code, 'item')
+			# 			insurance_claim, status = create_insurance_claim(doc, 'Lab Test Template', lab_rx.lab_test_code, 1, billing_item)
+			doc.reload()

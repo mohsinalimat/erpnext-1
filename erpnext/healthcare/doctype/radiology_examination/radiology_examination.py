@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-from erpnext.healthcare.utils import manage_healthcare_doc_cancel
+from erpnext.healthcare.utils import manage_healthcare_doc_cancel, create_insurance_claim
 from erpnext.healthcare.doctype.patient_appointment.patient_appointment import update_status
 from frappe.utils import cstr
 
@@ -25,11 +25,12 @@ class RadiologyExamination(Document):
 		insert_to_medical_record(self)
 		if self.appointment:
 			update_status(self.appointment, "Closed")
-		if self.insurance:
-			is_insurance_approval = frappe.get_value("Insurance Company", (frappe.get_value("Insurance Assignment", self.insurance, "insurance_company")), "is_insurance_approval")
-			if is_insurance_approval:
-				from erpnext.healthcare.utils import create_insurance_approval_doc
-				create_insurance_approval_doc(self)
+		make_insurance_claim(self)
+		# if self.insurance:
+		# 	is_insurance_approval = frappe.get_value("Insurance Company", (frappe.get_value("Insurance Assignment", self.insurance, "insurance_company")), "is_insurance_approval")
+		# 	if is_insurance_approval:
+		# 		from erpnext.healthcare.utils import create_insurance_approval_doc
+		# 		create_insurance_approval_doc(self)
 	def validate(self):
 		ref_company = False
 		if self.inpatient_record:
@@ -106,3 +107,12 @@ def insert_to_medical_record(doc):
 	medical_record.reference_name = doc.name
 	medical_record.reference_owner = doc.owner
 	medical_record.save(ignore_permissions=True)
+
+def make_insurance_claim(doc):
+	if doc.insurance_subscription and not doc.insurance_claim:
+		billing_item = frappe.get_cached_value('Radiology Procedure', doc.radiology_procedure, 'item')
+		insurance_claim, claim_status = create_insurance_claim(doc, 'Radiology Procedure', doc.radiology_procedure, 1, billing_item)
+		if insurance_claim:
+			frappe.set_value(doc.doctype, doc.name ,'insurance_claim', insurance_claim)
+			frappe.set_value(doc.doctype, doc.name ,'claim_status', claim_status)
+			doc.reload()

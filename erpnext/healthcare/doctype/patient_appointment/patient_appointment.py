@@ -13,7 +13,7 @@ from frappe.core.doctype.sms_settings.sms_settings import send_sms
 from erpnext.hr.doctype.employee.employee import is_holiday
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import set_revenue_sharing_distribution
 from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_receivable_account,get_income_account
-from erpnext.healthcare.utils import validity_exists, service_item_and_practitioner_charge, sales_item_details_for_healthcare_doc, get_insurance_details, create_companion_contact, create_insurance_approval_doc
+from erpnext.healthcare.utils import validity_exists, get_service_item_and_practitioner_charge, sales_item_details_for_healthcare_doc, get_insurance_details, create_companion_contact, create_insurance_approval_doc
 import datetime
 
 class PatientAppointment(Document):
@@ -135,12 +135,12 @@ class PatientAppointment(Document):
 		#Alert
 		confirm_sms(self)
 		creation_on_action(self, "SMS")
-
-		if self.insurance:
-			if self.procedure_template or self.radiology_procedure:
-				is_insurance_approval = frappe.get_value("Insurance Company", (frappe.get_value("Insurance Assignment", self.insurance, "insurance_company")), "is_insurance_approval")
-				if is_insurance_approval:
-					create_insurance_approval_doc(self)
+		make_insurance_claim(self)
+		# if self.insurance:
+		# 	if self.procedure_template or self.radiology_procedure:
+		# 		is_insurance_approval = frappe.get_value("Insurance Company", (frappe.get_value("Insurance Assignment", self.insurance, "insurance_company")), "is_insurance_approval")
+		# 		if is_insurance_approval:
+		# 			create_insurance_approval_doc(self)
 
 @frappe.whitelist()
 def invoice_appointment(appointment_doc, is_pos):
@@ -193,7 +193,8 @@ def set_invoice_details_for_appointment(appointment_doc, is_pos):
 		item_line.description = frappe.db.get_value("Item", item_line.item_code, "description")
 		item_line.rate = item_details.price_list_rate
 	else:
-		service_item, practitioner_charge = service_item_and_practitioner_charge(appointment_doc)
+		ip = True if appointment_doc.inpatient_record else False
+		service_item, practitioner_charge = get_service_item_and_practitioner_charge(appointment_doc.practitioner, ip=ip, practitioner_event=patientappointment_doc_appointment_obj.practitioner_event, appointment_type=appointment_doc.appointment_type)
 		item_line.item_code = service_item
 		item_line.description = "Consulting Charges:  " + appointment_doc.practitioner
 		item_line.income_account = get_income_account(appointment_doc.practitioner, appointment_doc.company)
@@ -785,3 +786,28 @@ def verify_repetition(doc):
 def patient_validation(doc):
 	if not  frappe.db.exists('Patient', doc.patient):
 		frappe.throw(_('Invalid Patient'))
+
+
+def make_insurance_claim(doc):
+	from erpnext.healthcare.utils import create_insurance_claim
+	if doc.insurance_subscription and not doc.insurance_claim:
+		if doc.procedure_template:
+			billing_item = frappe.get_cached_value('Clinical Procedure Template', doc.procedure_template, 'item')
+			insurance_claim, claim_status = create_insurance_claim(doc, 'Clinical Procedure Template', doc.procedure_template, 1, billing_item)
+			if insurance_claim:
+				frappe.set_value(doc.doctype, doc.name ,'insurance_claim', insurance_claim)
+				frappe.set_value(doc.doctype, doc.name ,'claim_status', claim_status)
+		elif doc.radiology_procedure:
+			billing_item = frappe.get_cached_value('Radiology Procedure', doc.radiology_procedure, 'item')
+			insurance_claim, claim_status = create_insurance_claim(doc, 'Radiology Procedure', doc.radiology_procedure, 1, billing_item)
+			if insurance_claim:
+				frappe.set_value(doc.doctype, doc.name ,'insurance_claim', insurance_claim)
+				frappe.set_value(doc.doctype, doc.name ,'claim_status', claim_status)
+		else:
+			ip = True if doc.inpatient_record else False
+			billing_item, rate  = get_service_item_and_practitioner_charge(doc.practitioner, ip= ip, practitioner_event= doc.practitioner_event, appointment_type=doc.appointment_type)
+			insurance_claim, claim_status = create_insurance_claim(doc, 'Appointment Type', doc.appointment_type, 1, billing_item)
+			if insurance_claim:
+				frappe.set_value(doc.doctype, doc.name ,'insurance_claim', insurance_claim)
+				frappe.set_value(doc.doctype, doc.name ,'claim_status', claim_status)
+		doc.reload()

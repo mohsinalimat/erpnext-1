@@ -12,7 +12,7 @@ from erpnext.healthcare.doctype.lab_test.lab_test import create_sample_doc, crea
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import set_revenue_sharing_distribution
 from erpnext.stock.stock_ledger import get_previous_sle
 import datetime
-from erpnext.healthcare.utils import sales_item_details_for_healthcare_doc, get_procedure_delivery_item, item_reduce_procedure_rate, manage_healthcare_doc_cancel, get_insurance_details
+from erpnext.healthcare.utils import sales_item_details_for_healthcare_doc, get_procedure_delivery_item, item_reduce_procedure_rate, manage_healthcare_doc_cancel, get_insurance_details, create_insurance_claim
 from erpnext.healthcare.doctype.patient_appointment.patient_appointment import update_status
 
 class ClinicalProcedure(Document):
@@ -76,11 +76,12 @@ class ClinicalProcedure(Document):
 		if self.inpatient_record and frappe.db.get_value("Healthcare Settings", None, "auto_invoice_inpatient") == '1':
 			self.invoice()
 		self.save()
-		if self.insurance:
-			is_insurance_approval = frappe.get_value("Insurance Company", (frappe.get_value("Insurance Assignment", self.insurance, "insurance_company")), "is_insurance_approval")
-			if is_insurance_approval:
-				from erpnext.healthcare.utils import create_insurance_approval_doc
-				create_insurance_approval_doc(self)
+		make_insurance_claim(self)
+		# if self.insurance:
+		# 	is_insurance_approval = frappe.get_value("Insurance Company", (frappe.get_value("Insurance Assignment", self.insurance, "insurance_company")), "is_insurance_approval")
+		# 	if is_insurance_approval:
+		# 		from erpnext.healthcare.utils import create_insurance_approval_doc
+		# 		create_insurance_approval_doc(self)
 
 	def invoice(self):
 		if not self.invoiced and self.status == "Completed" and not self.appointment:
@@ -340,11 +341,11 @@ def create_delivery_note(doc):
 		cost_center = frappe.get_cached_value('Company',  doc.company,  'cost_center')
 	delivery_note.source_service_unit = doc.service_unit
 	delivery_note.set_cost_center = cost_center if cost_center else ''
-	if doc.insurance:
-		delivery_note.insurance = doc.insurance
-		delivery_note.insurance_company_name = doc.insurance_company_name
-		delivery_note.insurance_approval_number = doc.insurance_approval_number
-		delivery_note.insurance_remarks = doc.insurance_remarks
+	# if doc.insurance:
+	# 	delivery_note.insurance = doc.insurance
+	# 	delivery_note.insurance_company_name = doc.insurance_company_name
+	# 	delivery_note.insurance_approval_number = doc.insurance_approval_number
+	# 	delivery_note.insurance_remarks = doc.insurance_remarks
 	for item in doc.items:
 		child = delivery_note.append('items')
 		item_details = sales_item_details_for_healthcare_doc(item.item_code, doc)
@@ -364,6 +365,7 @@ def create_delivery_note(doc):
 		child.amount = item_details.price_list_rate * child.qty
 		child.reference_dt = "Clinical Procedure"
 		child.reference_dn = doc.name
+
 
 	if delivery_note.items:
 		delivery_note.insert(ignore_permissions = True)
@@ -598,3 +600,12 @@ def get_procedure_prescribed(patient, encounter=False):
 	return frappe.db.sql(query.format(patient),{
 		'encounter': encounter
 	})
+
+def make_insurance_claim(doc):
+	if doc.insurance_subscription and not doc.insurance_claim:
+		billing_item = frappe.get_cached_value('Clinical Procedure Template', doc.procedure_template, 'item')
+		insurance_claim, claim_status = create_insurance_claim(doc, 'Clinical Procedure Template', doc.procedure_template, 1, billing_item)
+		if insurance_claim:
+			frappe.set_value(doc.doctype, doc.name ,'insurance_claim', insurance_claim)
+			frappe.set_value(doc.doctype, doc.name ,'claim_status', claim_status)
+			doc.reload()
