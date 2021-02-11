@@ -1,0 +1,214 @@
+{
+ "autoname": "naming_series:",
+ "beta": 1,
+ "creation": "2020-10-16 10:11:39.077709",
+ "description": "Healthcare Service Insurance Coverage",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "title",
+  "is_active",
+  "section_break_3",
+  "coverage_based_on",
+  "healthcare_insurance_coverage_plan",
+  "insurance_coverage_plan_name",
+  "column_break_3",
+  "healthcare_service",
+  "healthcare_service_template",
+  "medical_code_standard",
+  "medical_code",
+  "item",
+  "item_group",
+  "coverage_deatils_section",
+  "coverage",
+  "discount",
+  "maximum_number_of_claims",
+  "approval_mandatory_for_claim",
+  "manual_approval_only",
+  "column_break_12",
+  "start_date",
+  "end_date"
+ ],
+ "fields": [
+  {
+   "depends_on": "eval:doc.coverage_based_on == 'Service'",
+   "fieldname": "healthcare_service",
+   "fieldtype": "Select",
+   "label": "Healthcare Service",
+   "options": "\nAppointment Type\nClinical Procedure Template\nLab Test Template\nRadiology Procedure\nHealthcare Service Unit Type"
+  },
+  {
+   "depends_on": "eval:doc.coverage_based_on == 'Service'",
+   "fieldname": "healthcare_service_template",
+   "fieldtype": "Dynamic Link",
+   "label": "Healthcare Service Template",
+   "options": "healthcare_service"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "1",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "label": "Is Active"
+  },
+  {
+   "fieldname": "healthcare_insurance_coverage_plan",
+   "fieldtype": "Link",
+   "label": "Healthcare Insurance Coverage Plan",
+   "options": "Healthcare Insurance Coverage Plan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "coverage_deatils_section",
+   "fieldtype": "Section Break",
+   "label": "Coverage Deatils"
+  },
+  {
+   "fieldname": "coverage",
+   "fieldtype": "Percent",
+   "label": "Coverage"
+  },
+  {
+   "fieldname": "discount",
+   "fieldtype": "Percent",
+   "label": "Discount"
+  },
+  {
+   "description": "Number of claims allowed per year",
+   "fieldname": "maximum_number_of_claims",
+   "fieldtype": "Int",
+   "label": "Maximum Number of Claims"
+  },
+  {
+   "default": "0",
+   "fieldname": "approval_mandatory_for_claim",
+   "fieldtype": "Check",
+   "label": "Approval Mandatory for Claim"
+  },
+  {
+   "default": "0",
+   "depends_on": "approval_mandatory_for_claim",
+   "fieldname": "manual_approval_only",
+   "fieldtype": "Check",
+   "label": "Manual Approval Only"
+  },
+  {
+   "fieldname": "column_break_12",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "start_date",
+   "fieldtype": "Date",
+   "label": "Start Date"
+  },
+  {
+   "fieldname": "end_date",
+   "fieldtype": "Date",
+   "label": "End Date"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "HSIC-.YYYY.-"
+  },
+  {
+   "fieldname": "coverage_based_on",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Coverage Based on ",
+   "options": "Service\nItem\nItem Group\nMedical Code"
+  },
+  {
+   "fieldname": "section_break_3",
+   "fieldtype": "Section Break"
+  },
+  {
+   "depends_on": "eval:doc.coverage_based_on == 'Medical Code'",
+   "fieldname": "medical_code_standard",
+   "fieldtype": "Link",
+   "label": "Medical Code Standard",
+   "options": "Medical Code Standard"
+  },
+  {
+   "depends_on": "eval:doc.coverage_based_on == 'Medical Code'",
+   "fieldname": "medical_code",
+   "fieldtype": "Link",
+   "label": "Medical Code",
+   "options": "Medical Code"
+  },
+  {
+   "depends_on": "eval:doc.coverage_based_on == 'Item'",
+   "fieldname": "item",
+   "fieldtype": "Link",
+   "label": "Item",
+   "options": "Item"
+  },
+  {
+   "depends_on": "eval:doc.coverage_based_on == 'Item Group'",
+   "fieldname": "item_group",
+   "fieldtype": "Link",
+   "label": "Item Group",
+   "options": "Item Group"
+  },
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Title",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "healthcare_insurance_coverage_plan.coverage_plan_name",
+   "fieldname": "insurance_coverage_plan_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Insurance Coverage Plan Name",
+   "read_only": 1
+  }
+ ],
+ "modified": "2021-02-02 16:26:15.836300",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Healthcare Service Insurance Coverage",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Healthcare Administrator",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "title_field": "title",
+ "track_changes": 1,
+ "track_seen": 1
+}
