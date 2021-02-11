@@ -142,7 +142,6 @@ class SalesInvoice(SellingController):
 
 		if "Healthcare" in active_domains:
 			self.calculate_healthcare_insurance_claim()
-			self.validate_insurance_approval_qty()
 
 	def validate_fixed_asset(self):
 		for d in self.get("items"):
@@ -1214,25 +1213,14 @@ class SalesInvoice(SellingController):
 	def calculate_healthcare_insurance_claim(self):
 		total_claim_amount = 0
 		for item in self.items:
-			if item.amount and item.insurance_claim_coverage and float(item.insurance_claim_coverage) > 0:
-				item.insurance_claim_amount = item.amount * 0.01 * float(item.insurance_claim_coverage)
+			if item.insurance_claim:
+				insurance_claim_amount = frappe.db.get_value('Healthcare Insurance Claim', item.insurance_claim, 'claim_amount')
+				item.insurance_claim_amount = insurance_claim_amount
 			if item.insurance_claim_amount and float(item.insurance_claim_amount)>0:
 				total_claim_amount += float(item.insurance_claim_amount)
 		self.total_insurance_claim_amount = total_claim_amount
 		if self.total_insurance_claim_amount and self.outstanding_amount:
 			self.patient_payable_amount = self.outstanding_amount-self.total_insurance_claim_amount
-
-	def validate_insurance_approval_qty(self):
-		if self.items:
-			for item in self.items:
-				if item.insurance_approval:
-					insurance_approval = frappe.get_doc("Insurance Approval", item.insurance_approval)
-					if insurance_approval.items:
-						for approval_item in insurance_approval.items:
-							if item.item_code == approval_item.item:
-								if approval_item.approved_quantity < item.qty:
-									frappe.throw(_("Item Code: {0} quantity is greater than Insurance Approval : {1}  approved quantity".format(item.item_code, item.insurance_approval)))
-
 
 	def get_discounting_status(self):
 		status = None
@@ -1314,8 +1302,7 @@ class SalesInvoice(SellingController):
 		item_line.rate  = float(item_line.rate)
 		item_line  = set_revenue_sharing_distribution(self,item_line)
 		item_line.amount = float(item_line.rate) * float(item_line.qty)
-		if item_line.insurance_claim_coverage and float(item_line.insurance_claim_coverage) > 0:
-			item_line.insurance_claim_amount = item_line.amount * 0.01 * float(item_line.insurance_claim_coverage)
+		# item_line.insurance_claim_amount = item_line.insurance_claim_amount
 
 	def set_clinical_procedure_delivery_note(self, checked_item):
 		procedure_obj = frappe.get_doc("Clinical Procedure", checked_item['reference_dn'])

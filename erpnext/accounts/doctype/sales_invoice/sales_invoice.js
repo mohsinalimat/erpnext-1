@@ -803,43 +803,6 @@ frappe.ui.form.on('Sales Invoice', {
 			}
 		}
 	},
-	insurance: function(frm){
-		if (frappe.boot.active_domains.includes("Healthcare")){
-			if(frm.doc.insurance){
-				frappe.call({
-					method: "erpnext.healthcare.utils.get_insurance_pricelist",
-					args: {
-						"insurance": frm.doc.insurance,
-						"posting_date": frm.doc.posting_date,
-						"validate_insurance_on_invoice": frm.doc.validate_insurance_on_invoice
-					},
-					callback:function(r) {
-						if(r && r.message){
-							frm.set_value("healthcare_insurance_pricelist",r.message[0]);
-							frm.set_value("insurance_company",r.message[1]);
-							if(frm.doc.items){
-								frm.doc.items.forEach(function(item) {
-									if(!item.reference_dt && !item.reference_dn){
-										set_insurance_item(frm, item.doctype, item.name);
-									}
-								});
-							}
-							frm.refresh_fields();
-						}
-					}
-				});
-			}
-			else{
-				frm.set_value("insurance_company", '');
-				frm.set_value("healthcare_insurance_pricelist", '');
-				frm.doc.items.forEach(function(item) {
-					if(!item.reference_dt && !item.reference_dn){
-						set_insurance_item(frm, item.doctype, item.name);
-					}
-				});
-			}
-		}
-	},
 	refresh: function(frm) {
 		if (frappe.boot.active_domains.includes("Healthcare")){
 			frm.set_query("reference_dt", "items", function(){
@@ -848,15 +811,6 @@ frappe.ui.form.on('Sales Invoice', {
 						"module": "Healthcare",
 						"istable": 0,
 						"issingle": 0
-					}
-				};
-			});
-			frm.set_query("reference_dn", "items", function(){
-				return{
-					filters:{
-						"patient": frm.doc.patient,
-						"insurance": frm.doc.insurance,
-						"invoiced": 0
 					}
 				};
 			});
@@ -925,73 +879,6 @@ frappe.ui.form.on('Sales Invoice Timesheet', {
 		}
 	}
 })
-
-// Healthcare
-frappe.ui.form.on('Sales Invoice Item', {
-	item_code: function(frm, cdt, cdn){
-		if (frappe.boot.active_domains.includes("Healthcare")){
-			frappe.model.set_value(cdt, cdn, "reference_dt", '');
-			frappe.model.set_value(cdt, cdn, "reference_dn", '');
-			set_insurance_item(frm, cdt, cdn);
-		}
-	},
-	price_list_rate: function(frm, cdt, cdn){
-		if (frappe.boot.active_domains.includes("Healthcare")){
-			set_insurance_item(frm, cdt, cdn);
-		}
-	}
-});
-
-var set_insurance_item = function(frm, cdt, cdn){
-	var d = locals[cdt][cdn];
-	if(d.item_code && frm.doc.healthcare_insurance_pricelist){
-		frappe.db.get_value("Item Price", {'price_list': frm.doc.healthcare_insurance_pricelist, 'item_code': d.item_code}, ["name", "price_list_rate"], function(r){
-			if(r && r.name){
-				frappe.model.set_value(cdt, cdn, "insurance_item", true);
-				frappe.model.set_value(cdt, cdn, "price_list_rate", r.price_list_rate);
-			}
-			else{
-				frappe.model.set_value(cdt, cdn, "insurance_item", false);
-			}
-		});
-	}
-	else{
-		frappe.model.set_value(cdt, cdn, "insurance_item", false);
-	}
-	set_insurance_details_for_insurance_item(frm, cdt, cdn);
-};
-
-var set_insurance_details_for_insurance_item = function(frm, cdt, cdn){
-	var d = locals[cdt][cdn];
-	if(frm.doc.insurance && d.item_code && d.insurance_item){
-		frappe.call({
-			method: "erpnext.healthcare.utils.get_insurance_details_for_si",
-			args:{'insurance': frm.doc.insurance, 'service_item': d.item_code, 'patient': frm.doc.patient, valid_date: frm.doc.posting_date},
-			callback: function(r){
-				if(r.message){
-					frappe.model.set_value(cdt, cdn, "discount_percentage", r.message.discount);
-					frappe.model.set_value(cdt, cdn, "insurance_claim_coverage", r.message.coverage);
-				}
-				else{
-					frappe.model.set_value(cdt, cdn, "discount_percentage", '');
-					frappe.model.set_value(cdt, cdn, "insurance_claim_coverage", '');
-					frappe.model.set_value(cdt, cdn, "insurance_claim_amount", '');
-				}
-			}
-		});
-	}
-	else{
-		// TODO: Trigger item_code set item default values
-		frappe.db.get_value("Item Price", {'price_list': frm.doc.selling_price_list, 'item_code': d.item_code}, ["name", "price_list_rate"], function(r){
-			if(r && r.name){
-				frappe.model.set_value(cdt, cdn, "price_list_rate", r.price_list_rate);
-			}
-		});
-		frappe.model.set_value(cdt, cdn, "insurance_claim_coverage", '');
-		frappe.model.set_value(cdt, cdn, "insurance_claim_amount", '');
-	}
-};
-
 var calculate_total_billing_amount =  function(frm) {
 	var doc = frm.doc;
 
@@ -1052,20 +939,6 @@ var get_healthcare_services_to_invoice = function(frm) {
 				reqd: true
 			},
 			{ fieldtype: 'Data', read_only:1, fieldname: 'patient_name', depends_on:'eval:doc.patient', label: 'Patient Name'},
-			{
-				fieldtype: 'Link',
-				options: 'Insurance Assignment',
-				label: 'Insurance Assignment',
-				fieldname: "insurance",
-				get_query: function () {
-					return {
-						filters: {
-							"patient" : dialog.get_value('patient'),
-							"docstatus" :1
-						}
-					};
-				}
-			},
 			{ fieldtype: 'Section Break' },
 			{ fieldtype: 'HTML', fieldname: 'results_area' }
 		]
@@ -1096,26 +969,14 @@ var get_healthcare_services_to_invoice = function(frm) {
 			selected_insurance = '';
 			selected_patient = patient;
 			var method = "erpnext.healthcare.utils.get_healthcare_services_to_invoice";
-			var args = {patient: patient, posting_date:frm.doc.posting_date, validate_insurance_on_invoice:frm.doc.validate_insurance_on_invoice, insurance: '',};
+			var args = {patient: patient, posting_date:frm.doc.posting_date};
 			var columns = {"item_code": "Service", "item_name": "Item Name", "reference_dn": "Reference Name", "reference_dt": "Reference Type"};
 			get_healthcare_items(frm, true, $results, $placeholder, method, args, columns);
 		}
 		else if(!patient){
 			selected_patient = '';
-			dialog.set_values({'insurance': ''});
-			selected_insurance = '';
 			$results.empty();
 			$results.append($placeholder);
-		}
-	}
-	dialog.fields_dict["insurance"].df.onchange = () => {
-		var patient = dialog.fields_dict.patient.input.value;
-		if(patient && dialog.get_value('insurance') != selected_insurance){
-			selected_insurance = dialog.get_value('insurance')
-			var method = "erpnext.healthcare.utils.get_healthcare_services_to_invoice";
-			var args = {patient: patient, posting_date:frm.doc.posting_date, validate_insurance_on_invoice:frm.doc.validate_insurance_on_invoice, insurance: dialog.get_value('insurance'),};
-			var columns = {"item_code": "Service", "item_name": "Item Name", "reference_dn": "Reference Name", "reference_dt": "Reference Type"};
-			get_healthcare_items(frm, true, $results, $placeholder, method, args, columns);
 		}
 	}
 	$wrapper = dialog.fields_dict.results_area.$wrapper.append(`<div class="results"
@@ -1143,14 +1004,10 @@ var get_healthcare_items = function(frm, invoice_healthcare_services, $results, 
 		args: args,
 		callback: function(data) {
 			if(data.message){
-				var disabled = invoice_healthcare_services ? data.message[1]: false;
-				if(invoice_healthcare_services && disabled){
-					$results.append("<div align='center' style='color:red'>Services tagged with multiple Insurance Assignments, Can not be Invoiced togehter. You can select Insrance Assignment for apply filter</div>");
-				}
 				var items = data.message[0]
-				$results.append(make_list_row(columns, invoice_healthcare_services, {}, disabled));
+				$results.append(make_list_row(columns, invoice_healthcare_services, {}));
 				for(let i=0; i<items.length; i++){
-					$results.append(make_list_row(columns, invoice_healthcare_services, items[i], disabled));
+					$results.append(make_list_row(columns, invoice_healthcare_services, items[i]));
 				}
 			}else {
 				$results.append($placeholder);
@@ -1159,7 +1016,7 @@ var get_healthcare_items = function(frm, invoice_healthcare_services, $results, 
 	});
 }
 
-var make_list_row= function(columns, invoice_healthcare_services, result={}, disabled) {
+var make_list_row= function(columns, invoice_healthcare_services, result={}) {
 	var me = this;
 	// Make a head row by default (if result not passed)
 	let head = Object.keys(result).length === 0;
@@ -1177,7 +1034,7 @@ var make_list_row= function(columns, invoice_healthcare_services, result={}, dis
 	});
 	let $row = $(`<div class="list-item">
 		<div class="list-item__content" style="flex: 0 0 10px;">
-			<input type="checkbox" class="list-row-check" ${result.checked ? 'checked' : ''} ${disabled?'disabled':''}>
+			<input type="checkbox" class="list-row-check" ${result.checked ? 'checked' : ''}>
 		</div>
 		${contents}
 	</div>`);
@@ -1193,20 +1050,6 @@ var set_primary_action= function(frm, dialog, $results, invoice_healthcare_servi
 		if(checked_values.length > 0){
 			frm.set_value("patient", dialog.fields_dict.patient.input.value);
 			frm.set_value("patient_name", dialog.get_value("patient_name"));
-			if(invoice_healthcare_services) {
-				frm.set_value("insurance", dialog.fields_dict.insurance.input.value);
-				if(!dialog.fields_dict.insurance.input.value){
-					frm.set_value("healthcare_insurance_pricelist", "");
-					frm.set_value("insurance_company", "");
-				}
-			}
-			else{
-				frappe.db.get_value("Patient Encounter", dialog.get_value('encounter'), 'insurance', function(r) {
-					if(r && r.insurance){
-						frm.set_value("insurance",r.insurance);
-					}
-				});
-			}
 			frm.set_value("items", []);
 			add_to_item_line(frm, checked_values, invoice_healthcare_services);
 			dialog.hide();
