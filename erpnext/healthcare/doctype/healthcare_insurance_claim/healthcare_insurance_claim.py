@@ -37,7 +37,7 @@ def create_journal_entry_insurance_claim(self):
 	tax_amount = 0.0
 	accounts.append({
 			'account': get_party_account('Customer', sales_invoice.customer, sales_invoice.company),
-			'credit_in_account_currency': self.claim_amount,
+			'credit_in_account_currency': self.coverage_amount,
 			'party_type': 'Customer',
 			'party': sales_invoice.customer,
 			'reference_type': sales_invoice.doctype,
@@ -45,7 +45,7 @@ def create_journal_entry_insurance_claim(self):
 		})
 	accounts.append({
 			'account': insurance_company.insurance_company_receivable_account,
-			'debit_in_account_currency': self.claim_amount,
+			'debit_in_account_currency': self.coverage_amount,
 			'party_type': 'Customer',
 			'party': insurance_company.customer,
 		})

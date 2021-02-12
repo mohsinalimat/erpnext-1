@@ -1214,7 +1214,7 @@ class SalesInvoice(SellingController):
 		total_claim_amount = 0
 		for item in self.items:
 			if item.insurance_claim:
-				insurance_claim_amount = frappe.db.get_value('Healthcare Insurance Claim', item.insurance_claim, 'claim_amount')
+				insurance_claim_amount = frappe.db.get_value('Healthcare Insurance Claim', item.insurance_claim, 'coverage_amount')
 				item.insurance_claim_amount = insurance_claim_amount
 			if item.insurance_claim_amount and float(item.insurance_claim_amount)>0:
 				total_claim_amount += float(item.insurance_claim_amount)
