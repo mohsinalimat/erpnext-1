@@ -110,6 +110,10 @@ data = {
 				'fieldname': 'insurance_approval', 'label': 'Insurance Approval', 'fieldtype': 'Link',
 				'read_only': True, 'insert_after': 'insurance_item', 'options': 'Insurance Approval'
 			},
+			{
+				'fieldname': 'insurance_claim', 'label': 'Insurance Claim', 'fieldtype': 'Link',
+				'insert_after': 'insurance_claim_amount', 'read_only':True, 'options': 'Healthcare Insurance Claim'
+			},
 		],
 		'Delivery Note': [
 			{
@@ -158,7 +162,16 @@ data = {
 			{
 				'fieldname': 'reference_dn', 'label': 'Reference Name', 'fieldtype': 'Dynamic Link', 'options': 'reference_dt',
 				'insert_after': 'reference_dt'
-			}
+			},
+			{
+				'fieldname': 'insurance_claim', 'label': 'Insurance Claim', 'fieldtype': 'Link', 'insert_after': 'reference_dn',
+				'options': 'Healthcare Insurance Claim', 'read_only': True, "allow_on_submit": True,
+			},
+			{
+				'fieldname': 'claim_status', 'label': 'Claim Status', 'fieldtype': 'Select',
+				'read_only': True, 'insert_after': 'insurance_claim', 'options': '\nPending\nApproved\nRejected\nInvoiced',
+				'depends_on': 'insurance_claim', "allow_on_submit": True,
+			},
 		],
 		'Payment Entry': [
 			{
