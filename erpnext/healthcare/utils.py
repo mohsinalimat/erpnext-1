@@ -1923,8 +1923,6 @@ def create_insurance_claim(doc, service_doctype, service, qty, billing_item):
 		price_list_rate = get_insurance_price_list_rate(insurance_subscription.healthcare_insurance_coverage_plan, insurance_subscription.insurance_company, billing_item)
 		insurance_claim = frappe.new_doc('Healthcare Insurance Claim')
 		insurance_claim.patient = doc.patient
-		insurance_claim.reference_dt = doc.doctype
-		insurance_claim.reference_dn = doc.name
 		insurance_claim.insurance_subscription = doc.insurance_subscription
 		insurance_claim.insurance_company = doc.insurance_company
 		insurance_claim.healthcare_service_type = service_doctype
@@ -1934,6 +1932,7 @@ def create_insurance_claim(doc, service_doctype, service, qty, billing_item):
 		insurance_claim.claim_posting_date = nowdate()
 		insurance_claim.quantity = qty
 		insurance_claim.service_doctype = doc.doctype
+		insurance_claim.service_docname = doc.name
 		insurance_claim.service_item = billing_item
 		insurance_claim.discount = insurance_details.discount
 		insurance_claim.price_list_rate = price_list_rate
@@ -1944,7 +1943,7 @@ def create_insurance_claim(doc, service_doctype, service, qty, billing_item):
 		insurance_claim.coverage = insurance_details.coverage
 		insurance_claim.coverage_amount = float(insurance_claim.amount) * 0.01 * float(insurance_claim.coverage)
 		insurance_claim.claim_amount = insurance_claim.coverage_amount
-		insurance_claim.patient_payable_amount = insurance_claim.amount - insurance_claim.claim_amount 
+		insurance_claim.patient_payable_amount = insurance_claim.amount - insurance_claim.claim_amount
 		insurance_claim.save(ignore_permissions=True)
 		insurance_claim.submit()
 		return insurance_claim.name , insurance_claim.status
