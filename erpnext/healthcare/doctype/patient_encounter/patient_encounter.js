@@ -268,6 +268,14 @@ frappe.ui.form.on('Patient Encounter', {
 				};
 			}
 		});
+		frm.set_query("insurance_subscription", function() {
+			return {
+				filters: {
+					"patient": frm.doc.patient,
+					"docstatus": 1
+				}
+			};
+		});
 		frm.set_df_property("appointment", "read_only", frm.doc.__islocal ? 0:1);
 		frm.set_df_property("patient", "read_only", frm.doc.__islocal ? 0:1);
 		frm.set_df_property("patient_age", "read_only", frm.doc.__islocal ? 0:1);

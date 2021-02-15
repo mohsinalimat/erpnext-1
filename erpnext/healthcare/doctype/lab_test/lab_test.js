@@ -188,6 +188,14 @@ frappe.ui.form.on('Lab Test', {
 				};
 			}
 		});
+		frm.set_query("insurance_subscription", function() {
+			return {
+				filters: {
+					"patient": frm.doc.patient,
+					"docstatus": 1
+				}
+			};
+		});
 	},
 	onload: function (frm) {
 		 frm.add_fetch("practitioner", "department", "requesting_department");
