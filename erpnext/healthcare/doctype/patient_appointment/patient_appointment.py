@@ -48,15 +48,14 @@ class PatientAppointment(Document):
 				`tabPatient Appointment`
 			where
 				appointment_date=%(appointment_date)s and name!=%(name)s and status NOT IN ("Closed", "Cancelled")
-				and (practitioner=%(practitioner)s or patient=%(patient)s) and
-				((appointment_time<%(appointment_time)s and appointment_time + INTERVAL duration MINUTE>%(appointment_time)s) or
+				and ((appointment_time<%(appointment_time)s and appointment_time + INTERVAL duration MINUTE>%(appointment_time)s) or
 				(appointment_time>%(appointment_time)s and appointment_time<%(end_time)s) or
 				(appointment_time=%(appointment_time)s))
 		"""
 		# service unit overlap
 		if self.service_unit:
 			query +=""" and service_unit=%(service_unit)s"""
-			overlaps = frappe.db.sql(query.format(),{"appointment_date":self.appointment_date, "name":self.name, "practitioner":self.practitioner, "patient":self.patient,
+			overlaps = frappe.db.sql(query.format(),{"appointment_date":self.appointment_date, "name":self.name,
 						"appointment_time":self.appointment_time,  "end_time":end_time.time(), "service_unit":self.service_unit})
 			allow_overlap=frappe.get_value('Healthcare Service Unit', self.service_unit, 'overlap_appointments')
 			if allow_overlap:
@@ -69,6 +68,7 @@ class PatientAppointment(Document):
 				else:
 					overlaps = False
 		else:
+			query +=""" and (practitioner=%(practitioner)s or patient=%(patient)s)"""
 			overlaps  = frappe.db.sql(query.format(),{"appointment_date":self.appointment_date, "name":self.name, "practitioner":self.practitioner, "patient":self.patient,
 						"appointment_time":self.appointment_time,  "end_time":end_time.time()})
 		if overlaps:
