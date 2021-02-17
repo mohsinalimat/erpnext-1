@@ -8,6 +8,13 @@ from frappe.utils import getdate, nowdate
 from frappe.model.document import Document
 
 class HealthcareInsurancePaymentRequest(Document):
+	def on_submit(self):
+		if self.healthcare_insurance_payment_request_item:
+			for item in self.healthcare_insurance_payment_request_item:
+				if item.insurance_claim:
+					frappe.db.set_value('Healthcare Insurance Claim', item.insurance_claim, "status", 'Closed')
+
+
 	def create_payment_entry(self):
 		insurance_company = frappe.get_doc('Healthcare Insurance Company', self.insurance_company)
 		payment_entry = frappe.new_doc('Payment Entry')
@@ -30,7 +37,7 @@ def get_claim_item(insurance_company, from_date=False, to_date=False, posting_da
 		from
 			`tabHealthcare Insurance Claim`
 		where
-			insurance_company='{0}' and docstatus=1  and claim_status="Invoiced"
+			insurance_company='{0}' and docstatus=1  and status="Invoiced"
 	"""
 	if posting_date_type == 'Claim Posting Date':
 		if from_date:
@@ -49,3 +56,4 @@ def get_claim_item(insurance_company, from_date=False, to_date=False, posting_da
 	if claim_list:
 		return claim_list
 	return False
+
