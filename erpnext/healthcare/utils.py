@@ -300,7 +300,7 @@ def get_healthcare_services_to_invoice(patient, posting_date):
 
 							if inpatient_occupancy.service_unit:
 								cost_center = frappe.db.get_value("Healthcare Service Unit", inpatient_occupancy.service_unit, "cost_center")
-							
+
 							item_to_invoice.append({'reference_dt': 'Inpatient Occupancy', 'reference_dn': inpatient_occupancy.name, 'item_name':service_unit_type_item_name,
 							'item_code': service_unit_type.item, 'cost_center': cost_center if cost_center else '', 'qty': qty})
 			return item_to_invoice
@@ -339,7 +339,7 @@ def get_service_item_and_practitioner_charge(practitioner, ip = False, practitio
 	department = frappe.get_cached_value('Healthcare Practitioner', practitioner, 'department')
 	is_inpatient = ip
 	if practitioner_event:
-		service_item, practitioner_charge = get_practitioner_event_service_item(availability, is_inpatient)
+		service_item, practitioner_charge = get_practitioner_event_service_item(practitioner_event, is_inpatient)
 		if not service_item and not practitioner_charge:
 			service_item, practitioner_charge = get_appointment_type_service_item(appointment_type, department, is_inpatient)
 			if not service_item and not practitioner_charge:
@@ -382,7 +382,7 @@ def get_practitioner_event_service_item(practitioner_event, is_inpatient):
 	if is_inpatient:
 		service_item, practitioner_charge = frappe.db.get_value('Practitioner Event', practitioner_event, ['inpatient_visit_charge_item', 'inpatient_visit_charge'])
 	else:
-		service_item, practitioner_charge = frappe.db.get_value('Practitioner Event', practitioner_event, ['out_patient_consulting_charge_item', 'op_consulting_charge'])
+		service_item, practitioner_charge = frappe.db.get_value('Practitioner Event', practitioner_event, ['op_consulting_charge_item', 'op_consulting_charge'])
 	if service_item and practitioner_charge:
 		return service_item, practitioner_charge
 	return False, False
@@ -1309,72 +1309,72 @@ def manage_insurance_claim_on_si_cancel(doc):
 		if claim_obj.claim_status=="Claim Created" and claim_obj.docstatus == 1:
 			claim_obj.cancel()
 			frappe.db.set_value("Insurance Claim", claim_obj.name, "claim_status", "Cancelled")
-def create_insurance_claim(insurance, amount, doc):
-	insurance_claim=frappe.new_doc('Insurance Claim')
-	insurance_claim.patient = doc.patient
-	insurance_claim.insurance_company = insurance.insurance_company
-	insurance_claim.insurance_assignment = insurance.name
-	if doc.inpatient_record and insurance.ip_coverage:
-		insurance_claim.claim_percentage = insurance.ip_coverage
-		insurance_claim.claim_amount = amount*0.01*insurance.ip_coverage
-	else:
-		insurance_claim.claim_percentage = insurance.coverage
-		insurance_claim.claim_amount = amount*0.01*insurance.coverage
-	insurance_claim.bill_amount = amount
-	insurance_claim.created_by = frappe.session.user
-	insurance_claim.created_on = nowdate()
-	insurance_claim.sales_invoice = doc.name
-	insurance_claim.si_posting_date = doc.posting_date
-	insurance_claim.claim_status = "Claim Created"
-	insurance_claim_item=[]
-	for item in doc.items:
-		if item.insurance_claim_coverage and item.reference_dt and item.insurance_item != 1:
-			if frappe.get_meta(item.reference_dt).has_field("insurance"):
-				reference_doc = frappe.get_doc(item.reference_dt, item.reference_dn)
-			elif item.reference_dt in  ['Lab Prescription', 'Procedure Prescription', 'Inpatient Occupancy', 'Drug Prescription']:
-				reference_obj = frappe.get_doc(item.reference_dt, item.reference_dn)
-				if frappe.get_meta(reference_obj.parenttype).has_field("insurance"):
-					reference_doc = frappe.get_doc(reference_obj.parenttype,  reference_obj.parent)
-			if reference_doc.insurance and reference_doc.insurance== insurance.name :
-				insurance_remarks=''
-				if frappe.db.has_column(item.reference_dt, 'insurance_remarks'):
-					insurance_remarks = reference_doc.insurance_remarks
-				insurance_claim_item.append(set_insurance_claim_item(item, doc, insurance, insurance_remarks))
-		elif item.insurance_claim_coverage and item.insurance_item == 1:
-			insurance_claim_item.append(set_insurance_claim_item(item, doc, insurance))
-	insurance_claim.set("insurance_claim_item", insurance_claim_item)
-	insurance_claim.save(ignore_permissions = True)
-	insurance_claim.submit()
-
-def set_insurance_claim_item(item, doc, insurance, remarks=None):
-	return {
-		"patient": doc.patient,
-		"insurance_company": insurance.insurance_company,
-		"insurance_assignment": insurance.name,
-		"sales_invoice": doc.name,
-		"date_of_service": doc.posting_date,
-		"item_code": item.item_code,
-		"item_name": item.item_name,
-		"discount_percentage": item.discount_percentage,
-		"discount_amount": item.discount_amount,
-		"rate": item.rate,
-		"amount": item.amount,
-		"insurance_claim_coverage": item.insurance_claim_coverage,
-		"insurance_claim_amount": item.insurance_claim_amount,
-		"claim_status":"Claim Created",
-		"insurance_approval_number": item.insurance_approval_number,
-		"insurance_remarks": remarks if remarks else '',
-	}
-
-def get_insurance_approval_number(doc):
-	approval_number=False
-	for item in doc.items:
-		if item.insurance_approval_number:
-			if not approval_number:
-				approval_number = item.insurance_approval_number
-			else:
-				approval_number += ", " + item.insurance_approval_number
-	return approval_number if approval_number else ''
+# def create_insurance_claim(insurance, amount, doc):
+# 	insurance_claim=frappe.new_doc('Insurance Claim')
+# 	insurance_claim.patient = doc.patient
+# 	insurance_claim.insurance_company = insurance.insurance_company
+# 	insurance_claim.insurance_assignment = insurance.name
+# 	if doc.inpatient_record and insurance.ip_coverage:
+# 		insurance_claim.claim_percentage = insurance.ip_coverage
+# 		insurance_claim.claim_amount = amount*0.01*insurance.ip_coverage
+# 	else:
+# 		insurance_claim.claim_percentage = insurance.coverage
+# 		insurance_claim.claim_amount = amount*0.01*insurance.coverage
+# 	insurance_claim.bill_amount = amount
+# 	insurance_claim.created_by = frappe.session.user
+# 	insurance_claim.created_on = nowdate()
+# 	insurance_claim.sales_invoice = doc.name
+# 	insurance_claim.si_posting_date = doc.posting_date
+# 	insurance_claim.claim_status = "Claim Created"
+# 	insurance_claim_item=[]
+# 	for item in doc.items:
+# 		if item.insurance_claim_coverage and item.reference_dt and item.insurance_item != 1:
+# 			if frappe.get_meta(item.reference_dt).has_field("insurance"):
+# 				reference_doc = frappe.get_doc(item.reference_dt, item.reference_dn)
+# 			elif item.reference_dt in  ['Lab Prescription', 'Procedure Prescription', 'Inpatient Occupancy', 'Drug Prescription']:
+# 				reference_obj = frappe.get_doc(item.reference_dt, item.reference_dn)
+# 				if frappe.get_meta(reference_obj.parenttype).has_field("insurance"):
+# 					reference_doc = frappe.get_doc(reference_obj.parenttype,  reference_obj.parent)
+# 			if reference_doc.insurance and reference_doc.insurance== insurance.name :
+# 				insurance_remarks=''
+# 				if frappe.db.has_column(item.reference_dt, 'insurance_remarks'):
+# 					insurance_remarks = reference_doc.insurance_remarks
+# 				insurance_claim_item.append(set_insurance_claim_item(item, doc, insurance, insurance_remarks))
+# 		elif item.insurance_claim_coverage and item.insurance_item == 1:
+# 			insurance_claim_item.append(set_insurance_claim_item(item, doc, insurance))
+# 	insurance_claim.set("insurance_claim_item", insurance_claim_item)
+# 	insurance_claim.save(ignore_permissions = True)
+# 	insurance_claim.submit()
+#
+# def set_insurance_claim_item(item, doc, insurance, remarks=None):
+# 	return {
+# 		"patient": doc.patient,
+# 		"insurance_company": insurance.insurance_company,
+# 		"insurance_assignment": insurance.name,
+# 		"sales_invoice": doc.name,
+# 		"date_of_service": doc.posting_date,
+# 		"item_code": item.item_code,
+# 		"item_name": item.item_name,
+# 		"discount_percentage": item.discount_percentage,
+# 		"discount_amount": item.discount_amount,
+# 		"rate": item.rate,
+# 		"amount": item.amount,
+# 		"insurance_claim_coverage": item.insurance_claim_coverage,
+# 		"insurance_claim_amount": item.insurance_claim_amount,
+# 		"claim_status":"Claim Created",
+# 		"insurance_approval_number": item.insurance_approval_number,
+# 		"insurance_remarks": remarks if remarks else '',
+# 	}
+#
+# def get_insurance_approval_number(doc):
+# 	approval_number=False
+# 	for item in doc.items:
+# 		if item.insurance_approval_number:
+# 			if not approval_number:
+# 				approval_number = item.insurance_approval_number
+# 			else:
+# 				approval_number += ", " + item.insurance_approval_number
+# 	return approval_number if approval_number else ''
 
 @frappe.whitelist()
 def get_sales_invoice_for_healthcare_doc(doctype, docname):
@@ -1918,7 +1918,9 @@ def create_insurance_approval_items(doctype, docname):
 def create_insurance_claim(doc, service_doctype, service, qty, billing_item):
 	from erpnext.healthcare.doctype.healthcare_service_insurance_coverage.healthcare_service_insurance_coverage import get_service_insurance_coverage_details
 	insurance_details = get_service_insurance_coverage_details(service_doctype, service, billing_item, doc.insurance_subscription)
+	print('\n\n\n\n\n!@#$#@@@@@@@@@@@@@@@@@@@@@@@@@@@\n\n\n\n\n\n')
 	if insurance_details:
+		print('\n\n\n\n\n88888wwwwwwwwwwwwwwwwwwww\n\n\n\n\n\n')
 		insurance_subscription = frappe.get_doc('Healthcare Insurance Subscription', doc.insurance_subscription)
 		price_list_rate = get_insurance_price_list_rate(insurance_subscription.healthcare_insurance_coverage_plan, insurance_subscription.insurance_company, billing_item)
 		insurance_claim = frappe.new_doc('Healthcare Insurance Claim')
@@ -1944,7 +1946,7 @@ def create_insurance_claim(doc, service_doctype, service, qty, billing_item):
 		insurance_claim.coverage = insurance_details.coverage
 		insurance_claim.coverage_amount = float(insurance_claim.amount) * 0.01 * float(insurance_claim.coverage)
 		insurance_claim.claim_amount = insurance_claim.coverage_amount
-		insurance_claim.patient_payable_amount = insurance_claim.amount - insurance_claim.claim_amount 
+		insurance_claim.patient_payable_amount = insurance_claim.amount - insurance_claim.claim_amount
 		insurance_claim.save(ignore_permissions=True)
 		insurance_claim.submit()
 		return insurance_claim.name , insurance_claim.status
