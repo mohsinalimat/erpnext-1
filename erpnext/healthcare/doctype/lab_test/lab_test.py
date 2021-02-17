@@ -457,29 +457,21 @@ def invoice_lab_test(lab_test):
 	item_line.item_name = item_details.item_name
 	item_line.description = frappe.db.get_value("Item", item_line.item_code, "description")
 	item_line.rate = item_details.price_list_rate
-	if lab_test.insurance and item_line.item_code:
-		from erpnext.healthcare.utils import get_insurance_details
-		patient_doc= frappe.get_doc("Patient", lab_test.patient)
-		validate_insurance_on_invoice= frappe.db.get_value("Healthcare Settings", None, "validate_insurance_on_invoice")
-		valid_date = lab_test.submitted_date if validate_insurance_on_invoice=="1" else getdate()
-		insurance_details = get_insurance_details(lab_test.insurance, item_line.item_code, patient_doc)
-		if insurance_details:
-			item_line.discount_percentage = insurance_details.discount
-			if insurance_details.rate and insurance_details.rate > 0:
-				item_line.rate = insurance_details.rate
-			if item_line.discount_percentage and float(item_line.discount_percentage) > 0:
-				item_line.discount_amount = float(item_line.rate) * float(item_line.discount_percentage) * 0.01
-				if item_line.discount_amount and item_line.discount_amount > 0:
-					item_line.rate = float(item_line.rate) - float(item_line.discount_amount)
-			item_line.insurance_claim_coverage = insurance_details.coverage
-			item_line.insurance_approval_number=  lab_test.insurance_approval_number if lab_test.insurance_approval_number else ''
+	if lab_test.insurance_claim:
+		coverage, discount, price_list_rate = frappe.get_cached_value('Healthcare Insurance Claim', procedure.insurance_claim, ['coverage', 'discount', 'price_list_rate'])
+		item_line.discount_percentage = discount
+		item_line.rate = price_list_rate
+		item_line.insurance_claim_coverage = coverage
 	item_line.qty = 1
 	item_line.reference_dt = "Lab Test"
 	item_line.reference_dn = lab_test.name
 	item_line.rate  = float(item_line.rate)
 	item_line = set_revenue_sharing_distribution(sales_invoice, item_line)
 	item_line.amount = item_line.rate*item_line.qty
-	if lab_test.insurance and item_line.insurance_claim_coverage and float(item_line.insurance_claim_coverage) > 0:
+	if item_line.discount_percentage and float(item_line.discount_percentage) > 0:
+		item_line.discount_amount = float(item_line.amount) * float(item_line.discount_percentage) * 0.01
+		item_line.amount = item_line.amount - item_line.discount_amount
+	if item_line.insurance_claim_coverage and float(item_line.insurance_claim_coverage) > 0:
 		item_line.insurance_claim_amount = item_line.amount*0.01*float(item_line.insurance_claim_coverage)
 		sales_invoice.total_insurance_claim_amount = item_line.insurance_claim_amount
 

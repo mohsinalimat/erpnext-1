@@ -467,21 +467,11 @@ def invoice_clinical_procedure(procedure):
 	item_line.item_name = item_details.item_name
 	item_line.description = frappe.db.get_value("Item", item_line.item_code, "description")
 	item_line.rate = float(procedure.standard_selling_rate) - reduce_from_procedure_rate
-	if procedure.insurance and item_line.item_code:
-		patient_doc= frappe.get_doc("Patient", procedure.patient)
-		validate_insurance_on_invoice= frappe.db.get_value("Healthcare Settings", None, "validate_insurance_on_invoice")
-		valid_date = procedure.start_date if validate_insurance_on_invoice=="1" else getdate()
-		insurance_details = get_insurance_details(procedure.insurance, item_line.item_code, patient_doc, valid_date)
-		if insurance_details:
-			item_line.discount_percentage = insurance_details.discount
-			if insurance_details.rate and insurance_details.rate > 0:
-				item_line.rate = insurance_details.rate - reduce_from_procedure_rate
-			if item_line.discount_percentage and float(item_line.discount_percentage) > 0:
-				item_line.discount_amount = float(item_line.rate) * float(item_line.discount_percentage) * 0.01
-				if item_line.discount_amount and item_line.discount_amount > 0:
-					item_line.rate = float(item_line.rate) - float(item_line.discount_amount)
-			item_line.insurance_claim_coverage = insurance_details.coverage
-			item_line.insurance_approval_number=  procedure.insurance_approval_number if procedure.insurance_approval_number else ''
+	if procedure.insurance_claim and procedure.claim_status == 'Approved':
+		coverage, discount, price_list_rate = frappe.get_cached_value('Healthcare Insurance Claim', procedure.insurance_claim, ['coverage', 'discount', 'price_list_rate'])
+		item_line.discount_percentage = discount
+		item_line.rate = price_list_rate
+		item_line.insurance_claim_coverage = coverage
 	item_line.qty = 1
 	if procedure.appointment:
 		item_line.reference_dt = "Patient Appointment"
@@ -492,8 +482,11 @@ def invoice_clinical_procedure(procedure):
 	item_line.rate  = float(item_line.rate)
 	item_line  = set_revenue_sharing_distribution(sales_invoice,item_line)
 	item_line.amount = item_line.rate*item_line.qty
+	if item_line.discount_percentage and float(item_line.discount_percentage) > 0:
+		item_line.discount_amount = float(item_line.amount) * float(item_line.discount_percentage) * 0.01
+		item_line.amount = item_line.amount - item_line.discount_amount
 	item_line.cost_center = cost_center if cost_center else ''
-	if procedure.insurance and item_line.insurance_claim_coverage and float(item_line.insurance_claim_coverage) > 0:
+	if item_line.insurance_claim_coverage and float(item_line.insurance_claim_coverage) > 0:
 		item_line.insurance_claim_amount = item_line.amount*0.01*float(item_line.insurance_claim_coverage)
 		sales_invoice.total_insurance_claim_amount = item_line.insurance_claim_amount
 	sales_invoice.set_missing_values(for_validate = True)

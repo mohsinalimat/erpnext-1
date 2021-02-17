@@ -194,25 +194,18 @@ def set_invoice_details_for_appointment(appointment_doc, is_pos):
 		item_line.rate = item_details.price_list_rate
 	else:
 		ip = True if appointment_doc.inpatient_record else False
-		service_item, practitioner_charge = get_service_item_and_practitioner_charge(appointment_doc.practitioner, ip=ip, practitioner_event=patientappointment_doc_appointment_obj.practitioner_event, appointment_type=appointment_doc.appointment_type)
+		service_item, practitioner_charge = get_service_item_and_practitioner_charge(appointment_doc.practitioner, ip=ip, practitioner_event=appointment_doc.practitioner_event, appointment_type=appointment_doc.appointment_type)
 		item_line.item_code = service_item
-		item_line.description = "Consulting Charges:  " + appointment_doc.practitioner
+		item_line.description = frappe.get_value('Item', service_item, 'description')
 		item_line.income_account = get_income_account(appointment_doc.practitioner, appointment_doc.company)
 		item_line.rate = practitioner_charge
 
-	if appointment_doc.insurance and item_line.item_code:
-		patient_doc= frappe.get_doc("Patient", appointment_doc.patient)
-		insurance_details = get_insurance_details(appointment_doc.insurance, item_line.item_code, patient_doc, appointment_doc.appointment_date)
-		if insurance_details:
-			item_line.discount_percentage = insurance_details.discount
-			if insurance_details.rate and insurance_details.rate > 0:
-				item_line.rate = insurance_details.rate
-			if item_line.discount_percentage and float(item_line.discount_percentage) > 0:
-				item_line.discount_amount = float(item_line.rate) * float(item_line.discount_percentage) * 0.01
-				if item_line.discount_amount and item_line.discount_amount > 0:
-					item_line.rate = float(item_line.rate) - float(item_line.discount_amount)
-			item_line.insurance_claim_coverage = insurance_details.coverage
-			item_line.insurance_approval_number=  appointment_doc.insurance_approval_number if appointment_doc.insurance_approval_number else ''
+	if appointment_doc.insurance_claim and appointment_doc.claim_status == 'Approved':
+		coverage, discount, price_list_rate = frappe.get_cached_value('Healthcare Insurance Claim', appointment_doc.insurance_claim, ['coverage', 'discount', 'price_list_rate'])
+		item_line.discount_percentage = discount
+		item_line.rate = price_list_rate
+		item_line.insurance_claim_coverage = coverage
+		item_line.insurance_claim = appointment_doc.insurance_claim
 
 	item_line.reference_dt = "Patient Appointment"
 	item_line.reference_dn = appointment_doc.name
@@ -221,7 +214,10 @@ def set_invoice_details_for_appointment(appointment_doc, is_pos):
 	item_line.rate  = float(item_line.rate)
 	item_line  = set_revenue_sharing_distribution(sales_invoice,item_line)
 	item_line.amount = item_line.rate*item_line.qty
-	if appointment_doc.insurance and item_line.insurance_claim_coverage and float(item_line.insurance_claim_coverage) > 0:
+	if item_line.discount_percentage:
+		item_line.discount_amount =  item_line.amount*0.01*float(item_line.discount_percentage)
+		item_line.amount = item_line.amount - item_line.discount_amount
+	if appointment_doc.insurance_claim and item_line.insurance_claim_coverage and float(item_line.insurance_claim_coverage) > 0:
 		item_line.insurance_claim_amount = item_line.amount*0.01*float(item_line.insurance_claim_coverage)
 		sales_invoice.total_insurance_claim_amount = item_line.insurance_claim_amount
 

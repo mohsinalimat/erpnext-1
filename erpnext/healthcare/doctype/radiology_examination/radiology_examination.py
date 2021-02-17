@@ -82,13 +82,11 @@ def create_radiology_examination(appointment):
 	radiology_examination.company = appointment.company
 	radiology_examination.modality_type = appointment.modality_type
 	radiology_examination.modality = appointment.modality
-	if appointment.insurance:
-		radiology_examination.insurance=appointment.insurance
+	if appointment.insurance_subscription:
+		radiology_examination.insurance_subscription=appointment.insurance_subscription
 	radiology_examination.source=appointment.source
 	if appointment.referring_practitioner:
 		radiology_examination.referring_practitioner=appointment.referring_practitioner
-	if appointment.insurance_approval_number:
-		radiology_examination.insurance_approval_number=appointment.insurance_approval_number
 	return radiology_examination.as_dict()
 
 def insert_to_medical_record(doc):
