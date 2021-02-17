@@ -98,33 +98,8 @@ def get_data():
 			]
 		},
 		{
-			"label": _("Billing and Insurance"),
+			"label": _("Billing"),
 			"items": [
-				{
-					"type": "doctype",
-					"name": "Insurance Assignment",
-					"label": _("Insurance Assignment"),
-				},
-				{
-					"type": "doctype",
-					"name": "Insurance Claim",
-					"label": _("Insurance Claim"),
-				},
-				{
-					"type": "doctype",
-					"name": "Insurance Claim Submission",
-					"label": _("Insurance Claim Submission"),
-				},
-				{
-					"type": "doctype",
-					"name": "Contract Type",
-					"label": _("Contract Type"),
-				},
-				{
-					"type": "doctype",
-					"name": "Insurance Contract",
-					"label": _("Insurance Contract"),
-				},
 				{
 					"type": "doctype",
 					"name": "Practitioner Service Profile",
@@ -145,26 +120,62 @@ def get_data():
 					"name": "Appointment Analytics",
 					"is_query_report": True,
 					"label": _("Appointment Analytics"),
+				}
+			]
+		},
+		{
+			"label": _("Insurance"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Healthcare Insurance Company",
+					"label": _("Healthcare Insurance Company"),
 				},
 				{
 					"type": "doctype",
-					"name": "Insurance Type",
-					"label": _("Insurance Type"),
+					"name": "Healthcare Insurance Contract",
+					"label": _("Healthcare Insurance Contract"),
 				},
 				{
 					"type": "doctype",
-					"name": "Insurance Company",
-					"label": _("Insurance Company"),
+					"name": "Healthcare Insurance Coverage Plan",
+					"label": _("Healthcare Insurance Coverage Plan"),
 				},
 				{
 					"type": "doctype",
-					"name": "Insurance plan",
-					"label": _("Insurance plan"),
+					"name": "Healthcare Service Insurance Coverage",
+					"label": _("Healthcare Service Insurance Coverage"),
 				},
 				{
 					"type": "doctype",
-					"name": "Insurance Approval",
-					"label": _("Insurance Approval"),
+					"name": "Healthcare Insurance Subscription",
+					"label": _("Healthcare Insurance Subscription"),
+				},
+				{
+					"type": "doctype",
+					"name": "Healthcare Insurance Claim",
+					"label": _("Healthcare Insurance Claim"),
+				},
+				{
+					"type": "doctype",
+					"name": "Healthcare Insurance Payment Request",
+					"label": _("Healthcare Insurance Payment Request"),
+				}
+			]
+		},
+		{
+			"label": _("Medical Code"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Medical Code Standard",
+					"label": _("Medical Code Standard"),
+				},
+				{
+					"type": "doctype",
+					"name": "Medical Code",
+					"label": _("Medical Code"),
+					"onboard": 1,
 				}
 			]
 		},
