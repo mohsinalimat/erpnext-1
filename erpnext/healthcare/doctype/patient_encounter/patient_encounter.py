@@ -171,9 +171,13 @@ def make_insurance_claim(doc):
 						frappe.db.set_value(radiology.doctype, radiology.name, "insurance_claim", insurance_claim)
 					if claim_status:
 						frappe.db.set_value(radiology.doctype, radiology.name, "claim_status", claim_status)
-			# if doc.drug_prescription:
-			# 	for lab_rx in doc.drug_prescription:
-			# 		if lab_rx.lab_test_code:
-			# 			billing_item = frappe.get_cached_value('Lab Test Template', lab_rx.lab_test_code, 'item')
-			# 			insurance_claim, status = create_insurance_claim(doc, 'Lab Test Template', lab_rx.lab_test_code, 1, billing_item)
-			doc.reload()
+		if doc.drug_prescription:
+			for drug in doc.drug_prescription:
+				if drug.drug_code:
+					billing_item = drug.drug_code
+					insurance_claim, status = create_insurance_claim(doc, 'Item', drug.drug_code, 1, billing_item)
+					if insurance_claim:
+						frappe.db.set_value(drug.doctype, drug.name, "insurance_claim", insurance_claim)
+					if claim_status:
+						frappe.db.set_value(drug.doctype, drug.name, "claim_status", claim_status)
+		doc.reload()
