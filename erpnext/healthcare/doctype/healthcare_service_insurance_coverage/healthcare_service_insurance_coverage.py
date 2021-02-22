@@ -113,8 +113,7 @@ def valid_insurance(insurance_subscription, insurance_company, posting_date):
 		if frappe.db.exists('Healthcare Insurance Subscription',
 			{
 				'name': insurance_subscription,
-				'subscription_end_date':(">=", getdate(posting_date)),
-				'is_active': 1
+				'subscription_end_date':(">=", getdate(posting_date))
 			}):
 			return True
 	return False
