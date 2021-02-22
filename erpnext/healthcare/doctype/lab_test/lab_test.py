@@ -467,10 +467,11 @@ def invoice_lab_test(lab_test):
 	item_line.reference_dn = lab_test.name
 	item_line.rate  = float(item_line.rate)
 	item_line = set_revenue_sharing_distribution(sales_invoice, item_line)
-	item_line.amount = item_line.rate*item_line.qty
+	# item_line.amount = item_line.rate*item_line.qty
 	if item_line.discount_percentage and float(item_line.discount_percentage) > 0:
-		item_line.discount_amount = float(item_line.amount) * float(item_line.discount_percentage) * 0.01
-		item_line.amount = item_line.amount - item_line.discount_amount
+		item_line.discount_amount = float(item_line.rate) * float(item_line.discount_percentage) * 0.01
+		item_line.rate = item_line.rate - item_line.discount_amount
+	item_line.amount = item_line.rate*item_line.qty
 	if item_line.insurance_claim_coverage and float(item_line.insurance_claim_coverage) > 0:
 		item_line.insurance_claim_amount = item_line.amount*0.01*float(item_line.insurance_claim_coverage)
 		sales_invoice.total_insurance_claim_amount = item_line.insurance_claim_amount

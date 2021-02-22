@@ -213,14 +213,13 @@ def set_invoice_details_for_appointment(appointment_doc, is_pos):
 	item_line.qty = 1
 	item_line.rate  = float(item_line.rate)
 	item_line  = set_revenue_sharing_distribution(sales_invoice,item_line)
-	item_line.amount = item_line.rate*item_line.qty
 	if item_line.discount_percentage:
-		item_line.discount_amount =  item_line.amount*0.01*float(item_line.discount_percentage)
-		item_line.amount = item_line.amount - item_line.discount_amount
+		item_line.discount_amount =  item_line.rate*0.01*float(item_line.discount_percentage)
+		item_line.rate = item_line.rate - item_line.discount_amount
+	item_line.amount = item_line.rate*item_line.qty
 	if appointment_doc.insurance_claim and item_line.insurance_claim_coverage and float(item_line.insurance_claim_coverage) > 0:
 		item_line.insurance_claim_amount = item_line.amount*0.01*float(item_line.insurance_claim_coverage)
 		sales_invoice.total_insurance_claim_amount = item_line.insurance_claim_amount
-
 	if appointment_doc.mode_of_payment or appointment_doc.paid_amount:
 		payments_line = sales_invoice.append("payments")
 		payments_line.mode_of_payment = appointment_doc.mode_of_payment
