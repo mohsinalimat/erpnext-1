@@ -71,7 +71,7 @@ def get_healthcare_services_to_invoice(patient, posting_date):
 									if not skip_invoice:
 										validity['visits'] = 1
 										validity['valid_till'] = patient_appointment_obj.appointment_date + datetime.timedelta(days=int(valid_days))
-						if not practitioner_exist_in_list and not include_in_insurance:
+						if not practitioner_exist_in_list:
 							valid_till = patient_appointment_obj.appointment_date + datetime.timedelta(days=int(valid_days))
 							visits = 0
 							validity_exist = validity_exists(patient_appointment_obj.practitioner, patient_appointment_obj.patient)
