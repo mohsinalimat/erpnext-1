@@ -1,5 +1,4 @@
 {
- "actions": [],
  "beta": 1,
  "creation": "2020-10-26 08:50:24.587112",
  "doctype": "DocType",
@@ -13,7 +12,8 @@
   "sales_invoice",
   "discount",
   "claim_coverage",
-  "claim_amount"
+  "claim_amount",
+  "approved_amount"
  ],
  "fields": [
   {
@@ -64,12 +64,17 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Claim Amount"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "approved_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Approved Amount "
   }
  ],
- "index_web_pages_for_search": 1,
  "istable": 1,
- "links": [],
- "modified": "2020-10-27 11:27:32.456371",
+ "modified": "2021-02-23 18:13:57.050297",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Insurance Payment Request Item",

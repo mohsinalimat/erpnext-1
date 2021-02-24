@@ -16,6 +16,10 @@ class HealthcareInsuranceClaim(Document):
 			update_claim_status_to_service(self)
 		if self.status == 'Invoiced':
 			create_journal_entry_insurance_claim(self)
+		if self.status == 'Approved' and self.service_billed_jv:
+			jv_ref = self.service_billed_jv
+			self.db_set('service_billed_jv', '')
+			frappe.get_doc('Journal Entry', jv_ref).cancel()
 
 def update_claim_status_to_service(doc):
 	service_name = frappe.db.exists(doc.service_doctype,

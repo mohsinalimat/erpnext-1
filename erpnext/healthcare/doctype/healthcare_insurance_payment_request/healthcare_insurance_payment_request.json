@@ -1,5 +1,4 @@
 {
- "actions": [],
  "autoname": "naming_series:",
  "beta": 1,
  "creation": "2020-10-26 08:51:17.061748",
@@ -10,14 +9,17 @@
   "naming_series",
   "insurance_company",
   "insurance_company_name",
+  "status",
   "column_break_4",
   "posting_date_type",
   "from_date",
   "to_date",
   "section_break_8",
-  "healthcare_insurance_payment_request_item",
+  "items",
   "section_break_10",
   "total_claim_amount",
+  "column_break_12",
+  "total_approved_amount",
   "company",
   "amended_from"
  ],
@@ -68,12 +70,6 @@
    "fieldtype": "Section Break"
   },
   {
-   "fieldname": "healthcare_insurance_payment_request_item",
-   "fieldtype": "Table",
-   "label": "Healthcare Insurance Payment Request Item",
-   "options": "Healthcare Insurance Payment Request Item"
-  },
-  {
    "fieldname": "section_break_10",
    "fieldtype": "Section Break"
   },
@@ -98,12 +94,36 @@
    "options": "Healthcare Insurance Payment Request",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_12",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "total_approved_amount",
+   "fieldtype": "Currency",
+   "label": "Total Approved Amount",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "options": "Healthcare Insurance Payment Request Item"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Draft\nRequested\nConfirmed\nReceived",
+   "read_only": 1
   }
  ],
- "index_web_pages_for_search": 1,
  "is_submittable": 1,
- "links": [],
- "modified": "2020-11-09 09:08:33.588897",
+ "modified": "2021-02-23 18:23:31.620973",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Insurance Payment Request",

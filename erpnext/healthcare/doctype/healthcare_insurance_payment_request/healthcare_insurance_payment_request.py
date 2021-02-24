@@ -9,10 +9,11 @@ from frappe.model.document import Document
 
 class HealthcareInsurancePaymentRequest(Document):
 	def on_submit(self):
-		if self.healthcare_insurance_payment_request_item:
-			for item in self.healthcare_insurance_payment_request_item:
+		self.db_set('status', 'Requested')
+		if self.items:
+			for item in self.items:
 				if item.insurance_claim:
-					frappe.db.set_value('Healthcare Insurance Claim', item.insurance_claim, "status", 'Closed')
+					frappe.db.set_value('Healthcare Insurance Claim', item.insurance_claim, "status", 'Payment Requested')
 
 
 	def create_payment_entry(self):
@@ -24,10 +25,17 @@ class HealthcareInsurancePaymentRequest(Document):
 		payment_entry.payment_type="Receive"
 		payment_entry.party_type="Customer"
 		payment_entry.party = insurance_company.customer
-		payment_entry.paid_amount=self.total_claim_amount
+		payment_entry.paid_amount=self.total_approved_amount
 		payment_entry.setup_party_account_field()
 		payment_entry.set_missing_values()
 		return payment_entry.as_dict()
+
+	def confirmed(self):
+		self.db_set('status', 'Confirmed')
+		if self.items:
+			for item in self.items:
+				if item.insurance_claim:
+					frappe.db.set_value('Healthcare Insurance Claim', item.insurance_claim, "status", 'Payment Approved')
 
 @frappe.whitelist()
 def get_claim_item(insurance_company, from_date=False, to_date=False, posting_date_type = ''):

@@ -3,7 +3,20 @@
 
 frappe.ui.form.on('Healthcare Insurance Payment Request', {
 	refresh: function(frm) {
-		if(frm.doc.docstatus == 1){
+		if(frm.doc.docstatus == 1 && frm.doc.status == 'Requested'){
+			frm.add_custom_button(__('Confirmed'), function() {
+				frappe.call({
+					doc: frm.doc,
+					method: "confirmed",
+					callback: function(r) {
+						if(!r.exc){
+							cur_frm.reload_doc();
+						}
+					}
+				});
+			});
+		}
+		if(frm.doc.docstatus == 1 && frm.doc.status == 'Confirmed'){
 			frm.add_custom_button(__('Payment'), function() {
 				frm.events.make_payment_entry(frm);
 			});
@@ -33,7 +46,7 @@ frappe.ui.form.on('Healthcare Insurance Payment Request', {
 	}
 });
 var get_insurance_claim = function(frm){
-	frm.doc.healthcare_insurance_payment_request_item = [];
+	frm.doc.items = [];
 	if(frm.doc.insurance_company){
 		var args = {'insurance_company': frm.doc.insurance_company}
 		if(frm.doc.from_date){
@@ -49,7 +62,7 @@ var get_insurance_claim = function(frm){
 			callback: function (data) {
 				if(data.message){
 					data.message.forEach(function(claim){
-						var child_item=frappe.model.add_child(frm.doc, 'Healthcare Insurance Payment Request Item', 'healthcare_insurance_payment_request_item')
+						var child_item=frappe.model.add_child(frm.doc, 'Healthcare Insurance Payment Request Item', 'items')
 						frappe.model.set_value(child_item.doctype, child_item.name, 'insurance_claim', claim.name);
 						frappe.model.set_value(child_item.doctype, child_item.name, 'patient', claim.patient);
 						frappe.model.set_value(child_item.doctype, child_item.name, 'healthcare_service_type', claim.healthcare_service_type);
@@ -60,20 +73,28 @@ var get_insurance_claim = function(frm){
 						frappe.model.set_value(child_item.doctype, child_item.name, 'claim_amount', claim.coverage_amount);
 					});
 				}
-				frm.refresh_fields('healthcare_insurance_payment_request_item');
-				set_total_Claim_Amount(frm);
+				frm.refresh_fields('items');
+				set_total_claim_amount(frm);
 			}
 		});
 	}
 	frm.refresh_fields();
 }
-let set_total_Claim_Amount = function(frm){
-	var total_claim_amount=0;
-	for (var i in frm.doc.healthcare_insurance_payment_request_item) {
-		var item = frm.doc.healthcare_insurance_payment_request_item[i];
-		if(item.claim_amount ){
-			total_claim_amount = total_claim_amount + item.claim_amount
-		}
-	}
-	frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'total_claim_amount', total_claim_amount)
+let set_total_claim_amount = function(frm){
+	let total_claim_amount=0;
+	$.each(frm.doc.items, function(_i, e) {
+		total_claim_amount += e.claim_amount;
+	});
+	frm.set_value('total_claim_amount', total_claim_amount);
+	refresh_field('total_claim_amount');
 }
+frappe.ui.form.on('Healthcare Insurance Payment Request Item', {
+	approved_amount: function(frm){
+		let approved_amount = 0;
+		$.each(frm.doc.items, function(_i, e) {
+			approved_amount += e.approved_amount;
+		});
+		frm.set_value('total_approved_amount', approved_amount);
+		refresh_field('total_approved_amount');
+	}
+});

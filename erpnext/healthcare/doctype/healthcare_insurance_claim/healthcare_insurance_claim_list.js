@@ -4,9 +4,13 @@ frappe.listview_settings['Healthcare Insurance Claim'] = {
 			'Invoiced': 'green',
 			'Approved': 'blue',
 			'Pending': 'orange',
-            'Rejected': 'red',
+			'Rejected': 'red',
 			'Cancelled': 'grey',
-            'Closed': 'yellow'
+			'Payment Requested': 'yellow',
+			'Payment Approved': 'blue',
+			'Payment Received': 'green',
+			'Partial Payment Received': 'orange',
+			'Payment Rejected': 'red'
 		};
 		return [__(doc.status), colors[doc.status], 'status,=,' + doc.status];
 	}
