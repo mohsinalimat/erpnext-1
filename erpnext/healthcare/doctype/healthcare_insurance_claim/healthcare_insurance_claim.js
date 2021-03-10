@@ -7,12 +7,12 @@ frappe.ui.form.on('Healthcare Insurance Claim', {
 			calculate_claim_amount_on_update(frm)
 		}
 	},
-	discount: function (frm) {
+	discount: function(frm) {
 		if(frm.doc.discount){
 			calculate_claim_amount_on_update(frm)
 		}
 	},
-	coverage:function (frm) {
+	coverage:function(frm) {
 		if(frm.doc.coverage){
 			calculate_claim_amount_on_update(frm)
 		}

@@ -25,7 +25,7 @@ from erpnext.accounts.doctype.loyalty_program.loyalty_program import \
 	get_loyalty_program_details_with_points, get_loyalty_details, validate_loyalty_points
 from erpnext.accounts.deferred_revenue import validate_service_stop_date
 
-from erpnext.healthcare.utils import manage_invoice_submit_cancel, get_revenue_sharing_distribution
+from erpnext.healthcare.utils import manage_invoice_submit_cancel, get_revenue_sharing_distribution, manage_invoice_claim_validate
 
 from six import iteritems
 
@@ -142,6 +142,8 @@ class SalesInvoice(SellingController):
 
 		if "Healthcare" in active_domains:
 			self.calculate_healthcare_insurance_claim()
+			# calculate claim tax
+			manage_invoice_claim_validate(self)
 
 	def validate_fixed_asset(self):
 		for d in self.get("items"):
@@ -1214,10 +1216,16 @@ class SalesInvoice(SellingController):
 		total_claim_amount = 0
 		for item in self.items:
 			if item.insurance_claim:
-				insurance_claim_amount = frappe.db.get_value('Healthcare Insurance Claim', item.insurance_claim, 'coverage_amount')
+				insurance_claim_amount = frappe.db.get_value('Healthcare Insurance Claim', item.insurance_claim, 'claim_amount')
 				item.insurance_claim_amount = insurance_claim_amount
 			if item.insurance_claim_amount and float(item.insurance_claim_amount)>0:
 				total_claim_amount += float(item.insurance_claim_amount)
+			# claim tax
+			taxable_claim_amount = 0.00
+			if self.get("taxes"):
+				for tax in self.taxes:
+					taxable_claim_amount += float(item.amount * tax.rate/100) * 0.01 * float(item.insurance_claim_coverage)	
+				total_claim_amount += float(taxable_claim_amount)
 		self.total_insurance_claim_amount = total_claim_amount
 		if self.total_insurance_claim_amount and self.outstanding_amount:
 			self.patient_payable_amount = self.outstanding_amount-self.total_insurance_claim_amount
@@ -1302,7 +1310,7 @@ class SalesInvoice(SellingController):
 		item_line.rate  = float(item_line.rate)
 		item_line  = set_revenue_sharing_distribution(self,item_line)
 		item_line.amount = float(item_line.rate) * float(item_line.qty)
-		# item_line.insurance_claim_amount = item_line.insurance_claim_amount
+		# item_line.insurance_claim_coverage = item_line.insurance_claim_coverage
 
 	def set_clinical_procedure_delivery_note(self, checked_item):
 		procedure_obj = frappe.get_doc("Clinical Procedure", checked_item['reference_dn'])

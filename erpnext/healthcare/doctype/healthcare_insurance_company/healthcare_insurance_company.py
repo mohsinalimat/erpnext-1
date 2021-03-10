@@ -27,18 +27,22 @@ def create_customer(doc):
 	if not (territory):
 		territory = 'Rest Of The World'
 		frappe.msgprint(_('Please set default  territory in Selling Settings'), alert=True)
-	customer = frappe.new_doc('Customer')
-	customer.customer_name = doc.insurance_company_name
-	customer.customer_group = customer_group
-	customer.territory = territory
-	customer.customer_type = 'Company'
-	if doc.insurance_company_receivable_account:
-		accounts = []
-		accounts.append({
-			'account': doc.insurance_company_receivable_account,
-			'company': doc.company
-		})
-		customer.set('accounts', accounts)
-	customer.save(ignore_permissions = True)
-	frappe.db.set_value('Healthcare Insurance Company', doc.name, 'customer', customer.name)
-	frappe.msgprint(_('Customer {0} is created.').format(customer.name), alert=True)
+	if doc.customer:
+		customer = frappe.get_doc('Customer', doc.customer)
+	else:
+		customer = frappe.new_doc('Customer')
+	if customer:
+		customer.customer_name = doc.insurance_company_name
+		customer.customer_group = customer_group
+		customer.territory = territory
+		customer.customer_type = 'Company'
+		if doc.insurance_company_receivable_account:
+			accounts = []
+			accounts.append({
+				'account': doc.insurance_company_receivable_account,
+				'company': doc.company
+			})
+			customer.set('accounts', accounts)
+		customer.save(ignore_permissions = True)
+		frappe.db.set_value('Healthcare Insurance Company', doc.name, 'customer', customer.name)
+		frappe.msgprint(_('Customer {0} is created.').format(customer.name), alert=True)
