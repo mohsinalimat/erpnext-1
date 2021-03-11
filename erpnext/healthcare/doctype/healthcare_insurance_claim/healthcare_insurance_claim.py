@@ -4,6 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from erpnext.healthcare.utils import get_sales_invoice_for_healthcare_doc
 from frappe.model.document import Document
 
 class HealthcareInsuranceClaim(Document):
@@ -31,32 +32,33 @@ def update_claim_status_to_service(doc):
 
 def create_journal_entry_insurance_claim(self):
 	# create jv
-	sales_invoice = frappe.get_doc('Sales Invoice', self.sales_invoice)
-	insurance_company = frappe.get_doc('Healthcare Insurance Company', self.insurance_company)
-	from erpnext.accounts.party import get_party_account
-	journal_entry = frappe.new_doc('Journal Entry')
-	journal_entry.company = sales_invoice.company
-	journal_entry.posting_date =  self.billing_date
-	accounts = []
-	accounts.append({
-			'account': get_party_account('Customer', sales_invoice.customer, sales_invoice.company),
-			'credit_in_account_currency': self.claim_amount + self.claim_tax_amount,
-			'party_type': 'Customer',
-			'party': sales_invoice.customer,
-			'reference_type': sales_invoice.doctype,
-			'reference_name': sales_invoice.name
-		})
-	accounts.append({
-			'account': insurance_company.insurance_company_receivable_account,
-			'debit_in_account_currency': self.claim_amount + self.claim_tax_amount,
-			'party_type': 'Customer',
-			'party': insurance_company.customer,
-		})
-	journal_entry.set('accounts', accounts)
-	journal_entry.save(ignore_permissions = True)
-	journal_entry.submit()
-	frappe.db.set_value('Healthcare Insurance Claim', self.name, 'service_billed_jv', journal_entry.name)
-	self.reload()
+	sales_invoice = get_sales_invoice_for_healthcare_doc(self.service_doctype, self.service_docname)
+	if sales_invoice:
+		insurance_company = frappe.get_doc('Healthcare Insurance Company', self.insurance_company)
+		from erpnext.accounts.party import get_party_account
+		journal_entry = frappe.new_doc('Journal Entry')
+		journal_entry.company = sales_invoice.company
+		journal_entry.posting_date =  self.billing_date
+		accounts = []
+		accounts.append({
+				'account': get_party_account('Customer', sales_invoice.customer, sales_invoice.company),
+				'credit_in_account_currency': self.claim_amount + self.claim_tax_amount,
+				'party_type': 'Customer',
+				'party': sales_invoice.customer,
+				'reference_type': sales_invoice.doctype,
+				'reference_name': sales_invoice.name
+			})
+		accounts.append({
+				'account': insurance_company.insurance_company_receivable_account,
+				'debit_in_account_currency': self.claim_amount + self.claim_tax_amount,
+				'party_type': 'Customer',
+				'party': insurance_company.customer,
+			})
+		journal_entry.set('accounts', accounts)
+		journal_entry.save(ignore_permissions = True)
+		journal_entry.submit()
+		frappe.db.set_value('Healthcare Insurance Claim', self.name, 'service_billed_jv', journal_entry.name)
+		self.reload()
 
 def create_coverage_for_service_or_item(self):
 	healthcare_insurance_coverage_plan = frappe.db.get_value('Healthcare Insurance Subscription', self.insurance_subscription, 'healthcare_insurance_coverage_plan')

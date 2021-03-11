@@ -491,7 +491,7 @@ def manage_invoice_submit_cancel(doc, method):
 				if frappe.get_meta(item.reference_dt).has_field("invoiced"):
 					set_invoiced(item, method, doc.name)
 				if item.get('insurance_claim'):
-					update_insurance_claim(method, item.insurance_claim, doc.name, doc.posting_date, doc.total)
+					update_insurance_claim(method, item.insurance_claim, doc.posting_date, doc.total)
 	if method=="on_submit" and frappe.db.get_value("Healthcare Settings", None, "create_test_on_si_submit") == '1':
 		create_multiple("Sales Invoice", doc.name)
 	manage_revenue_sharing(doc, method)
@@ -1893,10 +1893,9 @@ def get_insurance_price_list_rate(healthcare_insurance_coverage_plan, insurance_
 				rate = frappe.db.get_value('Item Price', item_price, 'price_list_rate')
 	return rate
 
-def update_insurance_claim(method, insurance_claim, sales_invoice_name, posting_date, total_amount):
+def update_insurance_claim(method, insurance_claim, posting_date, total_amount):
 	if method=="on_submit":
 		insurance_claim = frappe.get_doc('Healthcare Insurance Claim', insurance_claim)
-		insurance_claim.sales_invoice = sales_invoice_name
 		insurance_claim.sales_invoice_posting_date = posting_date
 		insurance_claim.billing_date = nowdate()
 		insurance_claim.billing_amount = total_amount
@@ -1904,8 +1903,7 @@ def update_insurance_claim(method, insurance_claim, sales_invoice_name, posting_
 		insurance_claim.save(ignore_permissions= True)
 	elif method=="on_cancel":
 		insurance_claim = frappe.get_doc('Healthcare Insurance Claim', insurance_claim)
-		if insurance_claim.sales_invoice == sales_invoice_name:
-			insurance_claim.sales_invoice = ''
+		if insurance_claim and insurance_claim.status == 'Invoiced':
 			insurance_claim.sales_invoice_posting_date = ''
 			insurance_claim.billing_date = ''
 			insurance_claim.billing_amount = 0
