@@ -10,6 +10,7 @@ from frappe.model.document import Document
 
 class HealthcareServiceInsuranceCoverage(Document):
 	def validate(self):
+		self.healthcare_service_validate()
 		self.validate_service_overlap()
 		self.set_title()
 
@@ -42,6 +43,18 @@ class HealthcareServiceInsuranceCoverage(Document):
 		elif self.coverage_based_on == 'Item Group' and self.item_group:
 			self.title = _('{0} - {1}').format(self.coverage_based_on , self.item_group)
 
+	def healthcare_service_validate(self):
+		if self.coverage_based_on == 'Service' and not self.healthcare_service and not self.healthcare_service_template:
+			frappe.throw(_('Service and Template is mandatory'))
+		if self.coverage_based_on == 'Service' and self.healthcare_service and not self.healthcare_service_template:
+			frappe.throw(_('Service Template is mandatory'))
+		elif self.coverage_based_on == 'Item' and  not self.item:
+			frappe.throw(_('Item is mandatory'))
+		elif self.coverage_based_on == 'Item Group' and  not self.item_group:
+			frappe.throw(_('Item Group is mandatory'))
+		elif self.coverage_based_on == 'Medical Code' and  not self.medical_code:
+			frappe.throw(_('Medical Code is mandatory'))
+
 def get_service_insurance_coverage_details(service_doctype, service, service_item, insurance_subscription):
 	valid_date = nowdate()
 	coverage = 0
@@ -56,7 +69,7 @@ def get_service_insurance_coverage_details(service_doctype, service, service_ite
 											'healthcare_insurance_coverage_plan': insurance_subscription.healthcare_insurance_coverage_plan,
 											'is_active': 1,
 											'start_date':("<=", getdate(valid_date))
-										}, fields= ['name', 'healthcare_service_template','item', 'medical_code', 'item_group'])
+										}, fields= ['name', 'coverage_based_on', 'healthcare_service_template','item', 'medical_code', 'item_group'])
 			if healthcare_service_coverage_list:
 				if any((healthcare_service_coverage['healthcare_service_template'] == service) for healthcare_service_coverage in healthcare_service_coverage_list):
 					coverage, discount, is_auto_approval = get_insurance_coverage_details(insurance_subscription.healthcare_insurance_coverage_plan, service = service)
@@ -65,17 +78,18 @@ def get_service_insurance_coverage_details(service_doctype, service, service_ite
 					coverage, discount, is_auto_approval = get_insurance_coverage_details(insurance_subscription.healthcare_insurance_coverage_plan, service_item = service_item)
 					insurance_details = frappe._dict({'is_auto_approval': is_auto_approval, 'discount': discount, 'coverage': coverage})
 				else:
-					medical_code = frappe.db.get_value(service_doctype, service, 'medical_code')
-					if medical_code:
-						if any((healthcare_service_coverage['medical_code'] == medical_code) for healthcare_service_coverage in healthcare_service_coverage_list):
-							coverage, discount, is_auto_approval = get_insurance_coverage_details(insurance_subscription.healthcare_insurance_coverage_plan, medical_code = medical_code)
+					item_group = frappe.db.get_value('Item', service_item, 'item_group')
+					if item_group:
+						if any((healthcare_service_coverage['item_group'] == item_group) for healthcare_service_coverage in healthcare_service_coverage_list):
+							coverage, discount, is_auto_approval = get_insurance_coverage_details(insurance_subscription.healthcare_insurance_coverage_plan, item_group = item_group)
 							insurance_details = frappe._dict({'is_auto_approval': is_auto_approval, 'discount': discount, 'coverage': coverage})
 					else:
-						item_group = frappe.db.get_value('Item', service_item, 'item_group')
-						if item_group:
-							if any((healthcare_service_coverage['item_group'] == item_group) for healthcare_service_coverage in healthcare_service_coverage_list):
-								coverage, discount, is_auto_approval = get_insurance_coverage_details(insurance_subscription.healthcare_insurance_coverage_plan, item_group = item_group)
-								insurance_details = frappe._dict({'is_auto_approval': is_auto_approval, 'discount': discount, 'coverage': coverage})
+						if service_doctype != 'Item':
+							medical_code = frappe.db.get_value(service_doctype, service, 'medical_code')
+							if medical_code:
+								if any((healthcare_service_coverage['medical_code'] == medical_code) for healthcare_service_coverage in healthcare_service_coverage_list):
+									coverage, discount, is_auto_approval = get_insurance_coverage_details(insurance_subscription.healthcare_insurance_coverage_plan, medical_code = medical_code)
+									insurance_details = frappe._dict({'is_auto_approval': is_auto_approval, 'discount': discount, 'coverage': coverage})
 	return insurance_details
 
 def get_insurance_coverage_details(healthcare_insurance_coverage_plan, service = None, service_item = None, medical_code = None, item_group = None):
