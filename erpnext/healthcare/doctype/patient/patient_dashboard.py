@@ -21,7 +21,7 @@ def get_data():
 			},
 			{
 				'label': _('Insurance'),
-				'items': ['Insurance Assignment']
+				'items': ['Healthcare Insurance Subscription']
 			}
 		]
 	}
