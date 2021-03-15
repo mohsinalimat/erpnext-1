@@ -41,3 +41,15 @@ class HealthcareInsuranceSubscription(Document):
 
 	def set_title(self):
 		self.title = ('{0} with {1}').format(self.patient_name or self.patient, self.insurance_company_name or self.insurance_company)
+
+@frappe.whitelist()
+def expiring_subscription():
+	from frappe.utils import add_days, today
+	try:
+		subscription_list = frappe.db.get_list('Healthcare Insurance Subscription',
+			{'subscription_end_date': add_days(today(), -1), 'status': ['!=', 'Expired'],
+			'docstatus': 1})
+		for subscription in subscription_list:
+			frappe.db.set_value('Healthcare Insurance Subscription', subscription.name, 'status', 'Expired')
+	except Exception:
+		frappe.log_error(frappe.get_traceback())
