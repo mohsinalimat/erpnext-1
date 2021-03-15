@@ -17,6 +17,7 @@
   "age_html",
   "mobile_number",
   "column_break_8",
+  "status",
   "customer",
   "gender",
   "country",
@@ -159,10 +160,21 @@
    "hidden": 1,
    "label": "Title",
    "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "Active",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "\nActive\nExpired",
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2021-02-08 13:46:13.228540",
+ "modified": "2021-03-15 16:47:49.715237",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Insurance Subscription",
