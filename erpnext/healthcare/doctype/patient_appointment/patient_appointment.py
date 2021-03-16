@@ -18,6 +18,7 @@ import datetime
 
 class PatientAppointment(Document):
 	def on_update(self):
+		make_insurance_claim(self)
 		# if self.status in ["Open", "Scheduled", "Pending"]:
 		# 	update_status(self.name, self.status)
 		if self.companion_mobile and self.companion_name:

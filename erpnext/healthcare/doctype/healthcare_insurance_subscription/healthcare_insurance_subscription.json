@@ -128,7 +128,8 @@
    "fieldname": "subscription_end_date",
    "fieldtype": "Date",
    "in_list_view": 1,
-   "label": "Subscription End Date"
+   "label": "Subscription End Date",
+   "reqd": 1
   },
   {
    "fieldname": "healthcare_insurance_coverage_plan",
@@ -152,7 +153,8 @@
    "fetch_from": "insurance_company.insurance_company_name",
    "fieldname": "insurance_company_name",
    "fieldtype": "Data",
-   "label": "Insurance Company Name"
+   "label": "Insurance Company Name",
+   "read_only": 1
   },
   {
    "fieldname": "title",
@@ -174,7 +176,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2021-03-15 16:47:49.715237",
+ "modified": "2021-03-15 17:40:56.015253",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Insurance Subscription",
