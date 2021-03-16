@@ -10,5 +10,17 @@ frappe.ui.form.on('Healthcare Service Insurance Coverage', {
 					}
 				};
 		});
+	},
+	coverage: function(frm) {
+		if (frm.doc.coverage && frm.doc.coverage > 100) {
+			frm.set_value('coverage', '')
+			frappe.throw(__("Maximum Coverage allowed is 100%"));
+		}
+	},
+	discount: function(frm) {
+		if (frm.doc.discount && frm.doc.discount > 100) {
+			frm.set_value('discount', '')
+			frappe.throw(__("Maximum Discount allowed is 100%"));
+		}
 	}
 });

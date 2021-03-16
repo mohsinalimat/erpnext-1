@@ -12,6 +12,7 @@ class HealthcareServiceInsuranceCoverage(Document):
 	def validate(self):
 		self.validate_service_overlap()
 		self.set_title()
+		self.set_coverage_discount_below_100()
 
 	def validate_service_overlap(self):
 		filters = {'healthcare_insurance_coverage_plan': self.healthcare_insurance_coverage_plan, 'is_active': 1}
@@ -32,6 +33,7 @@ class HealthcareServiceInsuranceCoverage(Document):
 		service_insurance_coverages = frappe.db.exists('Healthcare Service Insurance Coverage', filters)
 		if service_insurance_coverages:
 			frappe.throw(_('Service/Item activated  this coverage plan {0}').format(frappe.bold(self.healthcare_insurance_coverage_plan)), title=_('Not Allowed'))
+
 	def set_title(self):
 		if self.coverage_based_on == 'Service' and self.healthcare_service_template:
 			self.title = _('{0} - {1} - {2}').format(self.coverage_based_on, self.healthcare_service, self.healthcare_service_template)
@@ -41,6 +43,11 @@ class HealthcareServiceInsuranceCoverage(Document):
 			self.title = _('{0} - {1}').format(self.coverage_based_on , self.item)
 		elif self.coverage_based_on == 'Item Group' and self.item_group:
 			self.title = _('{0} - {1}').format(self.coverage_based_on , self.item_group)
+
+	def set_coverage_discount_below_100(self):
+		if self.coverage > 100 or self.discount > 100:
+			frappe.throw(_('Maximum Coverage/Discount allowed is 100%'))
+
 
 def get_service_insurance_coverage_details(service_doctype, service, service_item, insurance_subscription):
 	valid_date = nowdate()
