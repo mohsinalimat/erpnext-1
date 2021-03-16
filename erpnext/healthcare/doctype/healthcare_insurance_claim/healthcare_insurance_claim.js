@@ -2,6 +2,14 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Healthcare Insurance Claim', {
+	refresh: function(frm) {
+		frm.set_query('insurance_subscription', function () {
+			return {
+				filters: {'patient': frm.doc.patient ? frm.doc.patient : '',
+									'status': 'Active'}
+			};
+		});
+	},
 	price_list_rate: function(frm) {
 		if(frm.doc.price_list_rate){
 			calculate_claim_amount_on_update(frm)
@@ -18,6 +26,7 @@ frappe.ui.form.on('Healthcare Insurance Claim', {
 		}
 	}
 });
+
 let calculate_claim_amount_on_update = function(frm){
 	if(frm.doc.price_list_rate){
 		var discount_amount = 0.0
