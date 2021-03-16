@@ -12,6 +12,7 @@
   "column_break_4",
   "insurance_subscription",
   "insurance_company",
+  "insurance_company_name",
   "claim_details_section",
   "mode_of_claim_approval",
   "claim_posting_date",
@@ -334,10 +335,17 @@
    "fieldtype": "Currency",
    "label": "Patient Payable Tax Amount",
    "read_only": 1
+  },
+  {
+   "fetch_from": "insurance_company.insurance_company_name",
+   "fieldname": "insurance_company_name",
+   "fieldtype": "Data",
+   "label": "Insurance Company Name",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2021-03-11 14:26:36.072813",
+ "modified": "2021-03-16 16:00:03.429577",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Insurance Claim",
