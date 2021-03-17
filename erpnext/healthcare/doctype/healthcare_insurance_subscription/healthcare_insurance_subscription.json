@@ -28,6 +28,8 @@
   "column_break_15",
   "subscription_end_date",
   "healthcare_insurance_coverage_plan",
+  "allow_override",
+  "coverage",
   "amended_from"
  ],
  "fields": [
@@ -173,10 +175,21 @@
    "options": "\nActive\nExpired",
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_override",
+   "fieldtype": "Check",
+   "label": "Allow Override"
+  },
+  {
+   "fieldname": "coverage",
+   "fieldtype": "Percent",
+   "label": "Coverage"
   }
  ],
  "is_submittable": 1,
- "modified": "2021-03-15 17:40:56.015253",
+ "modified": "2021-03-17 11:36:08.593281",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Insurance Subscription",
