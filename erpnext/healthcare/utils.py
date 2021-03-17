@@ -1846,6 +1846,9 @@ def create_insurance_claim(doc, service_doctype, service, qty, billing_item):
 	insurance_details = get_service_insurance_coverage_details(service_doctype, service, billing_item, doc.insurance_subscription)
 	if insurance_details:
 		insurance_subscription = frappe.get_doc('Healthcare Insurance Subscription', doc.insurance_subscription)
+		coverage = insurance_details.coverage
+		if insurance_subscription.allow_override and insurance_subscription.coverage:
+			coverage = insurance_subscription.coverage
 		price_list_rate = get_insurance_price_list_rate(insurance_subscription.healthcare_insurance_coverage_plan, insurance_subscription.insurance_company, billing_item)
 		insurance_claim = frappe.new_doc('Healthcare Insurance Claim')
 		insurance_claim.patient = doc.patient
@@ -1866,7 +1869,7 @@ def create_insurance_claim(doc, service_doctype, service, qty, billing_item):
 		if insurance_claim.discount and float(insurance_claim.discount) > 0:
 			insurance_claim.discount_amount = float(insurance_claim.price_list_rate) * float(insurance_claim.discount) * 0.01
 			insurance_claim.amount = float(price_list_rate - insurance_claim.discount_amount) * float(qty)
-		insurance_claim.coverage = insurance_details.coverage
+		insurance_claim.coverage = coverage
 		insurance_claim.coverage_amount = float(insurance_claim.amount) * 0.01 * float(insurance_claim.coverage)
 		insurance_claim.claim_amount = insurance_claim.coverage_amount
 		insurance_claim.patient_payable_amount = insurance_claim.amount - insurance_claim.claim_amount
