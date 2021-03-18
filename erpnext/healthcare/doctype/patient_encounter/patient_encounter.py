@@ -93,6 +93,9 @@ class PatientEncounter(Document):
 			if can_not_delete:
 				frappe.throw(_("Not permitted. "+msg))
 
+	def validate_appointment(self):
+		return frappe.db.exists('Patient Encounter', {'appointment': self.appointment})
+
 def insert_encounter_to_medical_record(doc):
 	subject = set_subject_field(doc)
 	medical_record = frappe.new_doc("Patient Medical Record")
