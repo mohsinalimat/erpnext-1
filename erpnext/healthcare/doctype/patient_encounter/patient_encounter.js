@@ -286,6 +286,19 @@ frappe.ui.form.on('Patient Encounter', {
 				}
 			});
 		}
+	},
+	appointment: function(frm) {
+		frappe.call({
+			method: "validate_appointment",
+			doc: frm.doc,
+			callback: function(r) {
+				console.log(r.message);
+				if (r.message) {
+					frm.set_value('appointment', '')
+					frappe.throw(__('Encounter <b><a href="#Form/Patient Encounter/{0}">{0}</a></b> already exists for this Appointment', [r.message]));
+				}
+		}
+		})
 	}
 });
 
