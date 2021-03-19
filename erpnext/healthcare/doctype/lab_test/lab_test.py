@@ -457,8 +457,8 @@ def invoice_lab_test(lab_test):
 	item_line.item_name = item_details.item_name
 	item_line.description = frappe.db.get_value("Item", item_line.item_code, "description")
 	item_line.rate = item_details.price_list_rate
-	if lab_test.insurance_claim:
-		coverage, discount, price_list_rate = frappe.get_cached_value('Healthcare Insurance Claim', procedure.insurance_claim, ['coverage', 'discount', 'price_list_rate'])
+	if lab_test.insurance_claim and lab_test.claim_status == 'Approved':
+		coverage, discount, price_list_rate = frappe.get_cached_value('Healthcare Insurance Claim', lab_test.insurance_claim, ['coverage', 'discount', 'price_list_rate'])
 		item_line.discount_percentage = discount
 		item_line.rate = price_list_rate
 		item_line.insurance_claim_coverage = coverage

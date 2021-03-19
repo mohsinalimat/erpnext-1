@@ -1630,13 +1630,13 @@ def set_revenue_sharing_item(doc, dist_line, practitioner_charge_item, reference
 	item_line.item_name = item_details.item_name
 	item_line.description = frappe.db.get_value("Item", item_line.item_code, "description")
 	item_line.rate = dist_line.amount
-	if reference_doc.insurance and item_line.item_code:
-		from erpnext.healthcare.utils import get_insurance_details
-		patient_doc= frappe.get_doc("Patient", doc.patient)
-		insurance_details = get_insurance_details(reference_doc.insurance, item_line.item_code, patient_doc, doc.posting_date)
-		if insurance_details:
-			item_line.insurance_claim_coverage = insurance_details.coverage
-			item_line.insurance_approval_number=  reference_doc.insurance_approval_number if reference_doc.insurance_approval_number else ''
+	if reference_doc.insurance_subscription and item_line.item_code:
+		insurance_claim, status = create_insurance_claim(reference_doc, 'Item', item_line.item_code, 1, billing_item)
+		if insurance_claim and status == 'Approved':
+			coverage, discount, price_list_rate = frappe.get_cached_value('Healthcare Insurance Claim', insurance_claim, ['coverage', 'discount', 'price_list_rate'])
+			item_line.discount_percentage = discount
+			item_line.rate = price_list_rate
+			item_line.insurance_claim_coverage = coverage
 	item_line.qty = 1
 	item_line.amount = item_line.rate*item_line.qty
 	item_line.reference_dt = reference_doc.doctype
