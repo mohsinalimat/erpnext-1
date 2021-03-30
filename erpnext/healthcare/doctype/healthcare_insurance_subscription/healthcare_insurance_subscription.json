@@ -14,6 +14,7 @@
   "patient_details_section",
   "patient",
   "patient_name",
+  "dob",
   "age_html",
   "mobile_number",
   "column_break_8",
@@ -187,10 +188,17 @@
    "fieldname": "coverage",
    "fieldtype": "Percent",
    "label": "Coverage"
+  },
+  {
+   "fetch_from": "patient.dob",
+   "fieldname": "dob",
+   "fieldtype": "Date",
+   "label": "Date of Birth",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2021-03-17 12:24:24.596017",
+ "modified": "2021-03-30 15:19:20.541332",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Insurance Subscription",

@@ -9,6 +9,9 @@
   "naming_series",
   "patient",
   "patient_name",
+  "gender",
+  "dob",
+  "mobile",
   "column_break_4",
   "insurance_subscription",
   "insurance_company",
@@ -342,10 +345,32 @@
    "fieldtype": "Data",
    "label": "Insurance Company Name",
    "read_only": 1
+  },
+  {
+   "fetch_from": "patient.sex",
+   "fieldname": "gender",
+   "fieldtype": "Link",
+   "label": "Gender",
+   "options": "Gender",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "patient.dob",
+   "fieldname": "dob",
+   "fieldtype": "Date",
+   "label": "Date of Birth",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "patient.mobile",
+   "fieldname": "mobile",
+   "fieldtype": "Data",
+   "label": "Mobile",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2021-03-16 16:00:03.429577",
+ "modified": "2021-03-30 15:22:00.767887",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Insurance Claim",
