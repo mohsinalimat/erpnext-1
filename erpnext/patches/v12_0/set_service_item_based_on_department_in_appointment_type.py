@@ -1,7 +1,6 @@
 import frappe
 
 def execute():
-	return
     frappe.reload_doctype("Appointment Type")
     frappe.reload_doctype("Appointment Type Service Item")
 
