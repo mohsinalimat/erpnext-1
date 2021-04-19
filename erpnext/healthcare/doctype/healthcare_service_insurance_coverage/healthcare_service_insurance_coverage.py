@@ -58,7 +58,7 @@ class HealthcareServiceInsuranceCoverage(Document):
 			frappe.throw(_('Medical Code is mandatory'))
 
 	def set_coverage_discount_below_100(self):
-		if self.coverage > 100 or self.discount > 100:
+		if (self.coverage and self.coverage > 100) or (self.discount and self.discount > 100):
 			frappe.throw(_('Maximum Coverage/Discount allowed is 100%'))
 
 def get_service_insurance_coverage_details(service_doctype, service, service_item, insurance_subscription):
